@@ -1,31 +1,26 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import './App.css';
-
-function App() {
-  const [count, setCount] = useState(0);
-
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+export default function App() {
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="grid min-h-screen w-full md:grid-cols-[300px_1fr] lg:grid-cols-[400px_1fr]">
+      <div className="hidden border-r bg-muted/40 md:block">
+        <div className="mt-auto p-3">
+          <Card x-chunk="dashboard-02-chunk-0">
+            <CardHeader className="p-2 pt-0 md:p-4">
+              <CardTitle>AI FILE UPLOAD</CardTitle>
+              <CardDescription>사용할 AI 템플릿이 저장된 파일을 업로드해주세요.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
+              <Button size="sm" className="w-full">
+                UPLOAD
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>count is {count}</button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+      <div className="flex flex-col">
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">하하</main>
       </div>
-      <p className="read-the-docs">Click on the Vite and React logos to learn more</p>
-    </>
+    </div>
   );
 }
-
-export default App;
