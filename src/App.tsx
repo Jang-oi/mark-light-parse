@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { axiosAPI } from '@/util/axios.ts';
 export default function App() {
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[300px_1fr] lg:grid-cols-[400px_1fr]">
@@ -19,7 +20,15 @@ export default function App() {
         </div>
       </div>
       <div className="flex flex-col">
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">하하</main>
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+          <Button
+            onClick={() => {
+              axiosAPI('/savePDF', { key: 'test' });
+            }}
+          >
+            테스트
+          </Button>
+        </main>
       </div>
     </div>
   );
