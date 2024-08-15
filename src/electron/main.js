@@ -6,24 +6,20 @@ import savePDFService from './savePDFService.js';
 import { defaultPath } from './common.js';
 const __dirname = path.resolve();
 
-// export const defaultPath = isDev ? `${__dirname}/src/electron` : `${__dirname}/resources/app`;
-
 let mainWindow, tray;
 const browserOption = {
   width: 1200,
   height: 960,
   webPreferences: {
+    webSecurity: false,
     contextIsolation: true,
-    enableRemoteModule: false,
-    nodeIntegration: false,
-    devTools: isDev,
-    preload: `${defaultPath}/preload.js`,
+    nodeIntegration: true,
+    preload: path.join(defaultPath, 'preload.mjs'),
   },
   autoHideMenuBar: true,
   show: true,
   resizable: false,
   center: true,
-  title: 'S',
 };
 
 const gotTheLock = app.requestSingleInstanceLock();
@@ -43,7 +39,11 @@ if (!gotTheLock) {
 const createWindow = async () => {
   mainWindow = new BrowserWindow(browserOption);
 
-  await mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${__dirname}/build/index.html`);
+  console.log(path.join(defaultPath, 'preload.mjs'));
+  if (isDev) await mainWindow.loadURL('http://localhost:3000');
+  else await mainWindow.loadURL(`file://${path.join(__dirname, 'resources', 'app', 'build', 'index.html')}`);
+
+  mainWindow.webContents.openDevTools({ mode: 'detach' });
 
   mainWindow.on('closed', function () {
     mainWindow = null;
@@ -62,7 +62,11 @@ const createWindow = async () => {
 };
 
 const createTray = () => {
-  tray = new Tray(`${defaultPath}/logo.png`);
+  const trayPath = isDev
+    ? path.join(defaultPath, 'logo.png')
+    : path.join(__dirname, 'resources', 'app', 'src', 'electron', 'logo.png');
+
+  tray = new Tray(trayPath);
 
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -112,7 +116,6 @@ app.on('window-all-closed', function () {
 // IPC 통신 설정
 ipcMain.on('savePDF', async (event, templateData) => {
   try {
-    // savePDFService.savePDF(templateData) 호출 후 결과를 기다림
     const templateMapping = {
       레이일: '주문일',
       레이이: '주문이',
@@ -125,6 +128,7 @@ ipcMain.on('savePDF', async (event, templateData) => {
     for (let i = 0; i < templateData.length; i++) {
       templateData[i]['oldOrderName'] = templateMapping[templateData[i]['template']];
     }
+
     const result = await savePDFService.savePDF(templateData);
     event.reply('pdfSaved', result);
   } catch (error) {

@@ -2,7 +2,7 @@ import isDev from 'electron-is-dev';
 import path from 'path';
 const __dirname = path.resolve();
 
-export const defaultPath = isDev ? `${__dirname}\\src\\electron` : `${__dirname}\\resources\\app`;
+export const defaultPath = isDev ? `${__dirname}\\src\\electron` : `${__dirname}\\resources\\app\\src\\electron`;
 export const scriptPath = `"${defaultPath}\\auto_layer_script.jsx"`;
 export const paramFilePath = `${defaultPath}\\params.txt`;
 export const IllustratorInstallPath =
