@@ -1,5 +1,5 @@
 {
-  "name": "mark-light-parse-fe",
+  "name": "mark-light-parse",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -51,5 +51,21 @@
     "cross-env": "^7.0.3",
     "electron": "^31.3.1",
     "electron-builder": "^24.13.3"
+  },
+  "author": {
+    "name": "Mark-Light ManageMent"
+  },
+  "build": {
+    "productName": "Mark-Light",
+    "asar": false,
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": true,
+      "shortcutName": "Mark-Light",
+      "artifactName": "Mark-Light ${version}.${ext}",
+      "uninstallDisplayName": "Mark-Light"
+    }
   }
 }
