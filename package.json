@@ -1,13 +1,14 @@
 {
-  "name": "mark-right-parse-fe",
+  "name": "mark-light-parse-fe",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "main": "src/electron/main.js",
+  "homepage": ".",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "start": "concurrently \"cross-env BROWSER=none vite\" \"wait-on http://localhost:3000 && electron .\"",
+    "build": "vite build && electron-builder",
+    "build:win": "vite build && electron-builder --win --x64"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.0",

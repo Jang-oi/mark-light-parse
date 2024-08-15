@@ -27,6 +27,15 @@ interface TemplateData {
 
 export default function MainPage() {
   const maxTemplates = 5;
+  const templates = [
+    { value: '레이일', label: '주문일' },
+    { value: '레이이', label: '주문이' },
+    { value: '레이삼', label: '주문삼' },
+    { value: '레이사', label: '주문사' },
+    { value: '레이오', label: '주문오' },
+    { value: '레이육', label: '주문육' },
+    { value: '레이칠', label: '주문칠' },
+  ];
   const [templateData, setTemplateData] = useState<TemplateData[]>([
     {
       id: 1,
@@ -87,7 +96,10 @@ export default function MainPage() {
     }
 
     // PDF 저장 로직을 여기에 추가
-    alert('PDF 저장이 완료되었습니다.');
+    window.electron.savePDF(templateData);
+    window.electron.onPDFSaved((message: any) => {
+      alert(message);
+    });
   };
 
   return (
@@ -118,13 +130,11 @@ export default function MainPage() {
                       <SelectContent>
                         <SelectGroup>
                           <SelectLabel>Template</SelectLabel>
-                          <SelectItem value="레이일">레이일</SelectItem>
-                          <SelectItem value="레이이">레이이</SelectItem>
-                          <SelectItem value="레이삼">레이삼</SelectItem>
-                          <SelectItem value="레이사">레이사</SelectItem>
-                          <SelectItem value="레이오">레이오</SelectItem>
-                          <SelectItem value="레이육">레이육</SelectItem>
-                          <SelectItem value="레이칠">레이칠</SelectItem>
+                          {templates.map((template) => (
+                            <SelectItem key={template.label} value={template.value}>
+                              {template.value}
+                            </SelectItem>
+                          ))}
                         </SelectGroup>
                       </SelectContent>
                     </Select>
