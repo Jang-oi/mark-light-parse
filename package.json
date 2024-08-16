@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "main": "src/electron/main.js",
+  "main": "electron/main.js",
   "homepage": ".",
   "scripts": {
     "start": "concurrently \"cross-env BROWSER=none vite\" \"wait-on http://localhost:3000 && electron .\"",
@@ -58,7 +58,7 @@
   "build": {
     "productName": "Mark-Light",
     "files": [
-      "src/electron/*",
+      "electron/*",
       "build/**/*"
     ],
     "asar": false,

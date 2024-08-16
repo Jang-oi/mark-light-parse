@@ -1,5 +1,5 @@
 import { createRequire } from 'module';
-import { aiFilePath, IllustratorInstallPath, scriptPath, paramFilePath } from './common.js';
+import {paths, userPaths} from './common.js';
 const require = createRequire(import.meta.url);
 const { exec } = require('child_process');
 const fs = require('fs');
@@ -19,6 +19,8 @@ function execPromise(command) {
 export default {
   savePDF: async (data) => {
     try {
+      const {paramFilePath, scriptPath} = paths;
+      const {IllustratorInstallPath, aiFilePath} = userPaths;
       // JSON 파일로 파라미터 저장
       fs.writeFileSync(paramFilePath, JSON.stringify(data));
 

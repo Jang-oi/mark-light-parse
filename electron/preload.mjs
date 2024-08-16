@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require('electron');
+import { ipcRenderer, contextBridge } from 'electron'
 
 contextBridge.exposeInMainWorld('electron', {
   savePDF: (data) => ipcRenderer.send('savePDF', data),
