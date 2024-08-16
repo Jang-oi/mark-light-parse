@@ -101,12 +101,11 @@ app.on('window-all-closed', function () {
 });
 
 // IPC 통신 설정
-ipcMain.on('savePDF', async (event, templateData) => {
+ipcMain.handle('savePDF', async (event, templateData) => {
     try {
-        const result = await savePDFService.savePDF(templateData);
-        event.reply('pdfSaved', result);
+        return await savePDFService.savePDF(templateData);
     } catch (error) {
         // 에러 발생 시 응답 보내기
-        event.reply('pdfSaved', `PDF 저장 중 오류 발생: ${error.message}`);
+        return `PDF 저장 중 오류 발생: ${error.message}`;
     }
 });
