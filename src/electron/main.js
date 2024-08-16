@@ -39,11 +39,8 @@ if (!gotTheLock) {
 const createWindow = async () => {
   mainWindow = new BrowserWindow(browserOption);
 
-  console.log(path.join(defaultPath, 'preload.mjs'));
   if (isDev) await mainWindow.loadURL('http://localhost:3000');
   else await mainWindow.loadURL(`file://${path.join(__dirname, 'resources', 'app', 'build', 'index.html')}`);
-
-  mainWindow.webContents.openDevTools({ mode: 'detach' });
 
   mainWindow.on('closed', function () {
     mainWindow = null;
