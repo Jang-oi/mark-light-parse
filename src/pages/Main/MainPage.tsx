@@ -86,7 +86,7 @@ export default function MainPage() {
         });
     }, [templates]);
 
-    const handleSavePDF = useCallback(() => {
+    const handleSavePDF = useCallback(async () => {
         const isValid = templateData.every(row => {
             // 모든 필드가 입력되었는지 확인
             const allFieldsFilled =
@@ -104,10 +104,9 @@ export default function MainPage() {
         }
 
         // PDF 저장 로직을 여기에 추가
-        window.electron.savePDF(templateData);
-        window.electron.onPDFSaved((message: any) => {
-            alert(message);
-        });
+        const message = await window.electron.savePDF(templateData);
+        alert (message);
+
     }, [templateData]);
 
     return (

@@ -1,7 +1,5 @@
-
 interface Electron {
-    savePDF: (templateData: TemplateData[]) => void;
-    onPDFSaved: (callback: (message: string) => void) => void;
+    savePDF: (templateData: TemplateData[]) => Promise<string>;
 }
 
 interface Window {
