@@ -11,8 +11,6 @@ const browserOption = {
   width: 1200,
   height: 960,
   webPreferences: {
-    webSecurity: false,
-    contextIsolation: true,
     nodeIntegration: true,
     preload: preloadPath,
   },
@@ -39,19 +37,16 @@ const createWindow = async () => {
   mainWindow = new BrowserWindow(browserOption);
 
   await mainWindow.loadURL(runPath);
-  mainWindow.webContents.openDevTools({ mode: 'detach' });
   mainWindow.on('closed', function () {
     mainWindow = null;
   });
 
-  mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
-    electronLocalShortcut.register(mainWindow, 'F5', () => {
-      mainWindow.reload();
-    });
-    electronLocalShortcut.register(mainWindow, 'Ctrl+F12', () => {
-      mainWindow.webContents.openDevTools({ mode: 'detach' });
-    });
+  mainWindow.show();
+  electronLocalShortcut.register(mainWindow, 'F5', () => {
+    mainWindow.reload();
+  });
+  electronLocalShortcut.register(mainWindow, 'F12', () => {
+    mainWindow.webContents.openDevTools({ mode: 'detach' });
   });
 };
 
@@ -108,6 +103,6 @@ ipcMain.handle('savePDF', async (event, templateData, pathData) => {
   }
 });
 
-ipcMain.handle('getUserConfig', () => {
-  return JSON.parse(fs.readFileSync(configFilePath, 'utf-8'));
+ipcMain.handle('getUserConfig', async () => {
+  return await JSON.parse(fs.readFileSync(configFilePath, 'utf-8'));
 });

@@ -34,13 +34,13 @@ interface PathData {
 const MAX_TEMPLATES = 5;
 export default function MainPage() {
   const templates = [
-    { value: '레이일', label: '주문일' },
-    { value: '레이이', label: '주문이' },
-    { value: '레이삼', label: '주문삼' },
-    { value: '레이사', label: '주문사' },
-    { value: '레이오', label: '주문오' },
-    { value: '레이육', label: '주문육' },
-    { value: '레이칠', label: '주문칠' },
+    { id: 1, value: '레이일', oldOrderName: '주문일' },
+    { id: 2, value: '레이이', oldOrderName: '주문이' },
+    { id: 3, value: '레이삼', oldOrderName: '주문삼' },
+    { id: 4, value: '레이사', oldOrderName: '주문사' },
+    { id: 5, value: '레이오', oldOrderName: '주문오' },
+    { id: 6, value: '레이육', oldOrderName: '주문육' },
+    { id: 7, value: '레이칠', oldOrderName: '주문칠' },
   ];
 
   const INIT_TEMPLATE_DATA = {
@@ -60,6 +60,7 @@ export default function MainPage() {
 
   const [templateData, setTemplateData] = useState<TemplateData[]>([INIT_TEMPLATE_DATA]);
   const [pathData, setPathData] = useState<PathData>(INIT_PATH_DATA);
+  const [isElectronReady, setIsElectronReady] = useState(false);
   const handleAddTemplate = () => {
     if (templateData.length < MAX_TEMPLATES)
       setTemplateData((prevData) => [...prevData, { ...INIT_TEMPLATE_DATA, id: prevData.length + 1 }]);
@@ -85,7 +86,7 @@ export default function MainPage() {
         if (row.id === id) {
           // 템플릿 필드에 따라 oldOrderName 설정
           const templateItem = templates.find((templateItem) => templateItem.value === row.template);
-          const oldOrderName = templateItem ? templateItem.label : ''; // templateItem이 undefined일 때 빈 문자열로 설정
+          const oldOrderName = templateItem ? templateItem.oldOrderName : ''; // templateItem이 undefined일 때 빈 문자열로 설정
           return {
             ...row,
             [field]: value,
@@ -127,13 +128,31 @@ export default function MainPage() {
   };
 
   useEffect(() => {
+    const checkElectron = () => {
+      if (window.electron) {
+        setIsElectronReady(true);
+      } else {
+        setTimeout(checkElectron, 100); // 100ms 후에 다시 확인
+      }
+    };
+
+    checkElectron();
+  }, []);
+
+  useEffect(() => {
     const getConfigData = async () => {
-      const config = await window.electron.getUserConfig();
-      setPathData(config);
+      if (isElectronReady) {
+        try {
+          const config = await window.electron.getUserConfig();
+          setPathData(config);
+        } catch (error) {
+          console.error('Failed to get user config:', error);
+        }
+      }
     };
 
     getConfigData();
-  }, []);
+  }, [isElectronReady]);
 
   return (
     <>
@@ -142,7 +161,6 @@ export default function MainPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[60px]">순서</TableHead>
                 <TableHead className="w-[200px]">템플릿</TableHead>
                 <TableHead>주문자 이름</TableHead>
                 <TableHead>사용자 이름</TableHead>
@@ -153,7 +171,6 @@ export default function MainPage() {
             <TableBody>
               {templateData.map((row) => (
                 <TableRow key={row.id}>
-                  <TableCell>{row.id}</TableCell>
                   <TableCell className="font-semibold">
                     <Select onValueChange={(value) => handleChange(row.id, 'template', value)}>
                       <SelectTrigger className="w-[180px]">
@@ -163,7 +180,7 @@ export default function MainPage() {
                         <SelectGroup>
                           <SelectLabel>Template</SelectLabel>
                           {templates.map((template) => (
-                            <SelectItem key={template.label} value={template.value}>
+                            <SelectItem key={template.id} value={template.value}>
                               {template.value}
                             </SelectItem>
                           ))}
