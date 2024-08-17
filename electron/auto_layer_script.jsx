@@ -74,18 +74,19 @@ function parseJSON(jsonStr) {
   return obj;
 }
 
-function getParamPath() {
-  // 경로 문자열에서 파일 이름을 교체
-  var filePath = $.fileName;
-  return filePath.replace(/auto_layer_script\.jsx$/, 'params.txt');
+function getFilePath(filePath, fileName) {
+  return filePath.replace(/auto_layer_script\.jsx$/, fileName);
 }
-if (doc) {
-  var paramPath = getParamPath();
-  var file = new File(paramPath);
 
-  file.open('r');
-  var paramData = file.read();
-  file.close();
+if (doc) {
+  var filePath = $.fileName;
+  var paramFilePath = getFilePath(filePath, 'params.json');
+  var configFilePath = getFilePath(filePath, 'userConfig.json');
+  var paramFile = new File(paramFilePath);
+
+  paramFile.open('r');
+  var paramData = paramFile.read();
+  paramFile.close();
 
   // JSON 문자열을 JavaScript 객체로 변환 (JSON.parse를 사용할 수 없으므로 직접 처리)
   var params = parseJSON(paramData);
@@ -102,5 +103,13 @@ if (doc) {
 
     processLayer(template, i * 210, template, userName, oldOrderName, orderName, resultLayer);
   }
-  savePDFCallBack('C:/Users/Jang-oi/Desktop/example.pdf');
+
+  var configFile = new File(configFilePath);
+
+  configFile.open('r');
+  var configData = configFile.read();
+  configFile.close();
+
+  var config = parseJSON(configData);
+  savePDFCallBack(config.pdfSavePath);
 }

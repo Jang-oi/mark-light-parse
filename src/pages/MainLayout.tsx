@@ -6,6 +6,10 @@ const sidebarNavItems = [
     title: 'PDF로 저장하기',
     href: '/',
   },
+  {
+    title: 'Update...',
+    href: '/404',
+  },
 ];
 
 interface SettingsLayoutProps {

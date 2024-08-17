@@ -1,8 +1,6 @@
-import { createRequire } from 'module';
-import { paths, userPaths } from './common.js';
-const require = createRequire(import.meta.url);
-const { exec } = require('child_process');
-const fs = require('fs');
+import { paths } from './common.js';
+import { exec } from 'child_process';
+import fs from 'fs';
 
 function execPromise(command) {
   return new Promise((resolve, reject) => {
@@ -17,12 +15,13 @@ function execPromise(command) {
 }
 
 export default {
-  savePDF: async (data) => {
+  savePDF: async (templateData, pathData) => {
     try {
-      const { paramFilePath, scriptPath } = paths;
-      const { illustratorInstallPath, aiFilePath } = userPaths;
-      // JSON 파일로 파라미터 저장
-      fs.writeFileSync(paramFilePath, JSON.stringify(data));
+      const { paramFilePath, scriptPath, configFilePath } = paths;
+      const { illustratorInstallPath, aiFilePath } = pathData;
+
+      fs.writeFileSync(paramFilePath, JSON.stringify(templateData));
+      fs.writeFileSync(configFilePath, JSON.stringify(pathData));
 
       const extendScriptCommand = `"${illustratorInstallPath}" -r ${scriptPath}`;
       const aiFileStartCommand = `"${illustratorInstallPath}" "${aiFilePath}"`;
