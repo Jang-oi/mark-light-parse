@@ -7,8 +7,8 @@ const sidebarNavItems = [
     href: '/',
   },
   {
-    title: 'Update...',
-    href: '/404',
+    title: '업데이트 예정 ...',
+    href: '/holding',
   },
 ];
 
