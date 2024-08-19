@@ -1,15 +1,15 @@
-import { app, BrowserWindow, Tray, Menu, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, Tray, Menu, dialog } from 'electron';
 import electronLocalShortcut from 'electron-localshortcut';
-import savePDFService from './savePDFService.js';
 import { paths } from './common.js';
-import fs from 'fs';
+import setupIpcHandlers from './ipcMainService.js';
+
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
 const { autoUpdater } = require('electron-updater');
 
 let mainWindow, tray;
-const { preloadPath, runPath, trayPath, configFilePath } = paths;
+const { preloadPath, runPath, trayPath } = paths;
 
 const browserOption = {
   width: 1200,
@@ -35,29 +35,33 @@ const browserOption = {
 const gotTheLock = app.requestSingleInstanceLock();
 
 function writeMessageToWindow(text) {
-  mainWindow.webContents.send('message', text);
+  mainWindow.webContents.send('update-status', text);
 }
 
 const autoUpdate = () => {
+  /*
   // 신규 버전 릴리즈 확인 시 호출 됨
   autoUpdater.on('checking-for-update', () => {
     writeMessageToWindow('업데이트 확인 중...');
   });
+*/
 
   // 업데이트 할 신규 버전이 있을 시 호출 됨
   autoUpdater.on('update-available', () => {
     writeMessageToWindow('신규 버전 확인 및 업데이트 가능.');
   });
 
-  // 업데이트 할 신규 버전이 없을 시 호출 됨
+  /*  // 업데이트 할 신규 버전이 없을 시 호출 됨
   autoUpdater.on('update-not-available', () => {
     writeMessageToWindow('신규 버전 없음.');
-  });
+  });*/
 
+  /*
   // 업데이트 확인 중 에러 발생 시 호출 됨
   autoUpdater.on('error', (err) => {
     writeMessageToWindow('에러 발생 : ' + err);
   });
+*/
 
   // 업데이트 설치 파일 다운로드 상태 수신
   // 해당 단계까지 자동으로 진행 됨
@@ -157,23 +161,10 @@ const createTray = () => {
 app.on('ready', () => {
   createWindow();
   createTray();
-  autoUpdater.checkForUpdatesAndNotify();
+  setupIpcHandlers();
+  // autoUpdater.checkForUpdatesAndNotify();
 });
 
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit();
-});
-
-// IPC 통신 설정
-ipcMain.handle('savePDF', async (event, templateData, pathData) => {
-  try {
-    return await savePDFService.savePDF(templateData, pathData);
-  } catch (error) {
-    // 에러 발생 시 응답 보내기
-    return `PDF 저장 중 오류 발생: ${error.message}`;
-  }
-});
-
-ipcMain.handle('getUserConfig', async () => {
-  return await JSON.parse(fs.readFileSync(configFilePath, 'utf-8'));
 });

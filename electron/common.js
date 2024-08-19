@@ -1,5 +1,6 @@
 import isDev from 'electron-is-dev';
 import path from 'node:path';
+import {exec} from "child_process";
 const __dirname = path.resolve();
 
 const basePaths = {
@@ -20,3 +21,15 @@ export const paths = {
   trayPath: path.join(currentPaths, 'logo.png'),
   configFilePath: path.join(currentPaths, 'userConfig.json'),
 };
+
+export const execPromise = (command) => {
+  return new Promise((resolve, reject) => {
+    exec(command, (err, stdout, stderr) => {
+      if (err) {
+        reject({ error: err, stderr });
+      } else {
+        resolve(stdout);
+      }
+    });
+  });
+}

@@ -1,6 +1,5 @@
-import { useEffect } from 'react';
-import { ipcRenderer } from 'electron';
-import { Route, Routes, useNavigate } from 'react-router-dom';
+// import { useEffect } from 'react';
+import { Route, Routes } from 'react-router-dom';
 
 import MainLayout from '@/pages/MainLayout.tsx';
 import MainPage from '@/pages/Main/MainPage.tsx';
@@ -8,17 +7,17 @@ import HoldPage from '@/pages/Holding/HoldPage.tsx';
 import AutoUpdatePage from '@/pages/AutoUpdate/AutoUpdate.tsx';
 
 export default function App() {
-  const navigate = useNavigate();
+  /*  const navigate = useNavigate();
 
   useEffect(() => {
-    ipcRenderer.on('update-available', () => {
+    window.ipcRenderer.on('update-status', () => {
       navigate('/autoUpdate');
     });
 
     return () => {
-      ipcRenderer.removeAllListeners('update-available');
+      window.ipcRenderer.removeListener('update-status');
     };
-  }, [navigate]);
+  }, [navigate]);*/
 
   return (
     <MainLayout>

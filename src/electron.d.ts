@@ -18,6 +18,13 @@ interface Electron {
   getUserConfig: () => Promise<PathData>;
 }
 
+interface IpcRenderer {
+  on: (channel: string, callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void) => void;
+  send: (channel: string, ...args: any[]) => void;
+  removeListener: (channel: string, callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void) => void;
+}
+
 interface Window {
   electron: Electron;
+  ipcRenderer: IpcRenderer;
 }
