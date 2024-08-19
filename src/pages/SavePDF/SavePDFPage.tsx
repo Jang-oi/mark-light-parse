@@ -16,37 +16,35 @@ import { useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group.tsx';
 import { Label } from '@/components/ui/label.tsx';
 import { useConfigStore } from '@/store/configStore.ts';
+import { TEMPLATES } from '@/utils/constant.ts';
 
 interface TemplateData {
   id: number;
+  option: number;
   template: string;
   orderName: string;
-  userName: string;
+  mainName: string;
   characterCount: string;
-  oldOrderName: string;
+  variantType: string;
+  layerName: string;
+  _orderName: string;
+  _mainName: string;
 }
 
 const MAX_TEMPLATES = 5;
 export default function SavePDFPage() {
-  const templates = [
-    { id: 1, value: '레이일', oldOrderName: '주문일' },
-    { id: 2, value: '레이이', oldOrderName: '주문이' },
-    { id: 3, value: '레이삼', oldOrderName: '주문삼' },
-    { id: 4, value: '레이사', oldOrderName: '주문사' },
-    { id: 5, value: '레이오', oldOrderName: '주문오' },
-    { id: 6, value: '레이육', oldOrderName: '주문육' },
-    { id: 7, value: '레이칠', oldOrderName: '주문칠' },
-  ];
-
   const INIT_TEMPLATE_DATA = {
     id: 1,
+    option: 1,
     template: '',
     orderName: '',
-    userName: '',
-    oldOrderName: '',
+    mainName: '',
     characterCount: '3',
+    variantType: '1',
+    layerName: '',
+    _orderName: '',
+    _mainName: '',
   };
-
   const [templateData, setTemplateData] = useState<TemplateData[]>([INIT_TEMPLATE_DATA]);
   const { pathData } = useConfigStore();
   const handleAddTemplate = () => {
@@ -60,41 +58,40 @@ export default function SavePDFPage() {
   };
 
   const handleChange = (id: number, field: keyof TemplateData, value: string) => {
-    if (field === 'orderName' || field === 'userName') {
-      // 한글만 포함된 문자열 추출
-      const koreanRegex = /[ㄱ-ㅎㅏ-ㅣ가-힣]/g;
-      const koreanOnly = value.match(koreanRegex)?.join('') || '';
-
-      if (koreanOnly.length > 3) return;
-      value = koreanOnly;
-    }
-
-    setTemplateData((prevData) => {
-      return prevData.map((row) => {
+    setTemplateData((prevData) =>
+      prevData.map((row) => {
         if (row.id === id) {
-          // 템플릿 필드에 따라 oldOrderName 설정
-          const templateItem = templates.find((templateItem) => templateItem.value === row.template);
-          const oldOrderName = templateItem ? templateItem.oldOrderName : ''; // templateItem이 undefined일 때 빈 문자열로 설정
-          return {
-            ...row,
-            [field]: value,
-            oldOrderName: oldOrderName,
-          };
+          let updatedRow = { ...row, [field]: value };
+          const { variantType, option, characterCount } = updatedRow;
+          // 한글만 포함된 문자열 추출
+          if (field === 'orderName' || field === 'mainName') {
+            const koreanRegex = /[ㄱ-ㅎㅏ-ㅣ가-힣]/g;
+            const koreanOnly = value.match(koreanRegex)?.join('') || '';
+
+            if (koreanOnly.length > 3) return row;
+            updatedRow[field] = koreanOnly;
+          } else {
+            let commonNameValue = `${variantType}${option}${characterCount}`;
+            if (id !== 2) commonNameValue = `${variantType}${option}3`;
+
+            updatedRow['layerName'] = commonNameValue;
+            updatedRow['_orderName'] = `N${commonNameValue}`;
+            updatedRow['_mainName'] = commonNameValue;
+          }
+
+          return updatedRow;
         }
         return row;
-      });
-    });
+      }),
+    );
   };
 
   const handleSavePDF = async () => {
     const isValid = templateData.every((row) => {
       // 모든 필드가 입력되었는지 확인
-      const allFieldsFilled =
-        row.template !== '' && row.orderName !== '' && row.userName !== '' && row.characterCount !== '';
-
+      const allFieldsFilled = row.template !== '' && row.orderName !== '' && row.mainName !== '';
       // 사용자 이름의 길이가 선택한 글자 수와 일치하는지 확인
-      const correctUserNameLength = row.userName.length === parseInt(row.characterCount);
-
+      const correctUserNameLength = row.mainName.length === parseInt(row.characterCount);
       return allFieldsFilled && correctUserNameLength;
     });
 
@@ -109,15 +106,16 @@ export default function SavePDFPage() {
 
   return (
     <>
-      <Card x-chunk="dashboard-07-chunk-1">
+      <Card className="w-full">
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[200px]">템플릿</TableHead>
+                <TableHead className="w-[250px]">템플릿</TableHead>
                 <TableHead>주문자 이름</TableHead>
                 <TableHead>사용자 이름</TableHead>
                 <TableHead className="w-[100px]">글자수</TableHead>
+                <TableHead className="w-[100px]">구분</TableHead>
                 <TableHead>삭제</TableHead>
               </TableRow>
             </TableHeader>
@@ -126,15 +124,15 @@ export default function SavePDFPage() {
                 <TableRow key={row.id}>
                   <TableCell className="font-semibold">
                     <Select onValueChange={(value) => handleChange(row.id, 'template', value)}>
-                      <SelectTrigger className="w-[180px]">
+                      <SelectTrigger className="w-[250px]">
                         <SelectValue placeholder="Select a Template" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
                           <SelectLabel>Template</SelectLabel>
-                          {templates.map((template) => (
-                            <SelectItem key={template.id} value={template.value}>
-                              {template.value}
+                          {TEMPLATES.map((templateItem) => (
+                            <SelectItem key={templateItem.id} value={templateItem.name}>
+                              {templateItem.name}
                             </SelectItem>
                           ))}
                         </SelectGroup>
@@ -145,20 +143,35 @@ export default function SavePDFPage() {
                     <Input value={row.orderName} onChange={(e) => handleChange(row.id, 'orderName', e.target.value)} />
                   </TableCell>
                   <TableCell>
-                    <Input value={row.userName} onChange={(e) => handleChange(row.id, 'userName', e.target.value)} />
+                    <Input value={row.mainName} onChange={(e) => handleChange(row.id, 'mainName', e.target.value)} />
                   </TableCell>
                   <TableCell>
                     <RadioGroup
-                      defaultValue={row.characterCount}
+                      defaultValue={'3'}
                       onValueChange={(value) => handleChange(row.id, 'characterCount', value)}
                     >
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="2" id="r2" />
-                        <Label htmlFor="r2">2</Label>
+                        <RadioGroupItem value="2" id="2" />
+                        <Label>2</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="3" id="r3" />
-                        <Label htmlFor="r3">3</Label>
+                        <RadioGroupItem value="3" id="3" />
+                        <Label>3</Label>
+                      </div>
+                    </RadioGroup>
+                  </TableCell>
+                  <TableCell>
+                    <RadioGroup
+                      defaultValue={'1'}
+                      onValueChange={(value) => handleChange(row.id, 'variantType', value)}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="1" id="normal" />
+                        <Label>일반</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="2" id="extra" />
+                        <Label>대용량</Label>
                       </div>
                     </RadioGroup>
                   </TableCell>

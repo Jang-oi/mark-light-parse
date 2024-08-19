@@ -7,11 +7,15 @@ interface PathData {
 
 interface TemplateData {
   id: number;
+  option: number;
   template: string;
   orderName: string;
-  userName: string;
+  mainName: string;
   characterCount: string;
-  oldOrderName: string;
+  variantType: string;
+  layerName: string;
+  _orderName: string;
+  _mainName: string;
 }
 
 interface Electron {

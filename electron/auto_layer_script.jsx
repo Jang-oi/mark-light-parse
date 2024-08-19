@@ -27,7 +27,7 @@ function findLayerByName(layerName) {
   return null;
 }
 
-function processLayer(layerName, yOffset, oldText, newText, oldOrderName, newOrderName, targetLayer) {
+function processLayer(layerName, yOffset, _orderName, orderName, _mainName, mainName, targetLayer) {
   var layers = doc.layers;
   var yOffsetPoints = yOffset * 2.83465; // 1mm = 2.83465pt
 
@@ -41,10 +41,10 @@ function processLayer(layerName, yOffset, oldText, newText, oldOrderName, newOrd
 
       for (var k = 0; k < textFramesLength; k++) {
         var contents = textFrames[k].contents;
-        if (contents === oldText) {
-          textFrames[k].contents = newText;
-        } else if (contents === oldOrderName) {
-          textFrames[k].contents = newOrderName;
+        if (contents === _orderName) {
+          textFrames[k].contents = orderName;
+        } else if (contents === _mainName) {
+          textFrames[k].contents = mainName;
         }
       }
 
@@ -93,15 +93,17 @@ if (doc) {
 
   // 각 항목 처리
   for (var i = 0; i < params.length; i++) {
-    var template = params[i].template;
+    // 주문자 입력 정보
+    var layerName = params[i].layerName;
     var orderName = params[i].orderName;
-    var userName = params[i].userName;
-    var characterCount = params[i].characterCount;
-    var oldOrderName = params[i].oldOrderName;
+    var mainName = params[i].mainName;
+
+    var _orderName = params[i]._orderName;
+    var _mainName = params[i]._mainName;
 
     var resultLayer = findLayerByName('결과물');
 
-    processLayer(template, i * 210, template, userName, oldOrderName, orderName, resultLayer);
+    processLayer(layerName, i * 210, _orderName, orderName, _mainName, mainName, resultLayer);
   }
 
   var configFile = new File(configFilePath);
