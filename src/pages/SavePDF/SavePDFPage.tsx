@@ -20,7 +20,7 @@ import { TEMPLATES } from '@/utils/constant.ts';
 
 interface TemplateData {
   id: number;
-  option: number;
+  option: string;
   template: string;
   orderName: string;
   mainName: string;
@@ -35,7 +35,7 @@ const MAX_TEMPLATES = 5;
 export default function SavePDFPage() {
   const INIT_TEMPLATE_DATA = {
     id: 1,
-    option: 1,
+    option: '1',
     template: '',
     orderName: '',
     mainName: '',
@@ -72,7 +72,7 @@ export default function SavePDFPage() {
             updatedRow[field] = koreanOnly;
           } else {
             let commonNameValue = `${variantType}${option}${characterCount}`;
-            if (id !== 2) commonNameValue = `${variantType}${option}3`;
+            if (option !== '2') commonNameValue = `${variantType}${option}3`;
 
             updatedRow['layerName'] = commonNameValue;
             updatedRow['_orderName'] = `N${commonNameValue}`;
@@ -123,7 +123,7 @@ export default function SavePDFPage() {
               {templateData.map((row) => (
                 <TableRow key={row.id}>
                   <TableCell className="font-semibold">
-                    <Select onValueChange={(value) => handleChange(row.id, 'template', value)}>
+                    <Select onValueChange={(value) => handleChange(row.id, 'option', value)}>
                       <SelectTrigger className="w-[250px]">
                         <SelectValue placeholder="Select a Template" />
                       </SelectTrigger>
@@ -131,7 +131,7 @@ export default function SavePDFPage() {
                         <SelectGroup>
                           <SelectLabel>Template</SelectLabel>
                           {TEMPLATES.map((templateItem) => (
-                            <SelectItem key={templateItem.id} value={templateItem.name}>
+                            <SelectItem key={templateItem.id} value={templateItem.option}>
                               {templateItem.name}
                             </SelectItem>
                           ))}

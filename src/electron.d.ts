@@ -7,7 +7,7 @@ interface PathData {
 
 interface TemplateData {
   id: number;
-  option: number;
+  option: string;
   template: string;
   orderName: string;
   mainName: string;
