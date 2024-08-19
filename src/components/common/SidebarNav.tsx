@@ -9,7 +9,7 @@ interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
   }[];
 }
 
-export function SidebarNav({ className, items, ...props }: SidebarNavProps) {
+const SidebarNav = ({ className, items, ...props }: SidebarNavProps) => {
   const location = useLocation();
   const pathname = location.pathname;
 
@@ -30,4 +30,6 @@ export function SidebarNav({ className, items, ...props }: SidebarNavProps) {
       ))}
     </nav>
   );
-}
+};
+
+export default SidebarNav;

@@ -1,5 +1,5 @@
 import { Separator } from '@/components/ui/separator.tsx';
-import { SidebarNav } from '@/components/common/SidebarNav.tsx';
+import SidebarNav from '@/components/common/SidebarNav.tsx';
 import React from 'react';
 
 const sidebarNavItems = [

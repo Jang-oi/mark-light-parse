@@ -17,11 +17,11 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group.tsx';
 import { Label } from '@/components/ui/label.tsx';
 import { useConfigStore } from '@/store/configStore.ts';
 import { TEMPLATES } from '@/utils/constant.ts';
+import { toast } from '@/components/ui/use-toast.ts';
 
 interface TemplateData {
   id: number;
   option: string;
-  template: string;
   orderName: string;
   mainName: string;
   characterCount: string;
@@ -36,7 +36,6 @@ export default function SavePDFPage() {
   const INIT_TEMPLATE_DATA = {
     id: 1,
     option: '1',
-    template: '',
     orderName: '',
     mainName: '',
     characterCount: '3',
@@ -48,9 +47,14 @@ export default function SavePDFPage() {
   const [templateData, setTemplateData] = useState<TemplateData[]>([INIT_TEMPLATE_DATA]);
   const { pathData } = useConfigStore();
   const handleAddTemplate = () => {
-    if (templateData.length < MAX_TEMPLATES)
+    if (templateData.length < MAX_TEMPLATES) {
       setTemplateData((prevData) => [...prevData, { ...INIT_TEMPLATE_DATA, id: prevData.length + 1 }]);
-    else alert(`최대 ${MAX_TEMPLATES}개의 템플릿만 추가할 수 있습니다.`);
+    } else {
+      toast({
+        variant: 'destructive',
+        title: `최대 ${MAX_TEMPLATES}개의 템플릿만 추가할 수 있습니다.`,
+      });
+    }
   };
 
   const handleDeleteRow = (id: number) => {
@@ -89,19 +93,23 @@ export default function SavePDFPage() {
   const handleSavePDF = async () => {
     const isValid = templateData.every((row) => {
       // 모든 필드가 입력되었는지 확인
-      const allFieldsFilled = row.template !== '' && row.orderName !== '' && row.mainName !== '';
+      const allFieldsFilled = row.orderName !== '' && row.mainName !== '';
       // 사용자 이름의 길이가 선택한 글자 수와 일치하는지 확인
       const correctUserNameLength = row.mainName.length === parseInt(row.characterCount);
       return allFieldsFilled && correctUserNameLength;
     });
 
     if (!isValid) {
-      alert('모든 필드를 올바르게 입력해 주세요.\n사용자 이름의 길이는 선택한 글자 수와 일치해야 합니다.');
+      toast({
+        variant: 'destructive',
+        title: '모든 필드를 올바르게 입력해 주세요.',
+        description: '사용자 이름의 길이는 선택한 글자 수와 일치해야 합니다.',
+      });
       return;
     }
 
     const message = await window.electron.savePDF(templateData, pathData);
-    alert(message);
+    toast({ title: message });
   };
 
   return (

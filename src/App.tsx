@@ -6,10 +6,12 @@ import HoldPage from '@/pages/Holding/HoldPage.tsx';
 import AutoUpdatePage from '@/pages/AutoUpdate/AutoUpdate.tsx';
 import ExcelUploadPage from '@/pages/ExcelUpload/ExcelUploadPage.tsx';
 import SavePDFPage from '@/pages/SavePDF/SavePDFPage.tsx';
+import { Toaster } from '@/components/ui/toaster.tsx';
 
 export default function App() {
   return (
     <RootLayout>
+      <Toaster />
       <Routes>
         <Route path={'/'} element={<MainPage />}></Route>
         <Route path={'/savePDF'} element={<SavePDFPage />}></Route>

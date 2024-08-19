@@ -3,9 +3,11 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card.tsx';
 import InputField from '@/components/common/InputField.tsx';
 import { Button } from '@/components/ui/button.tsx';
+import { useToast } from '@/components/ui/use-toast.ts';
 
 export default function MainPage() {
   const { pathData, setPathData } = useConfigStore();
+  const { toast } = useToast();
   const [isElectronReady, setIsElectronReady] = useState(false);
 
   const handlePathChange = (e: any) => {
@@ -14,7 +16,7 @@ export default function MainPage() {
   };
   const handleSavePath = async () => {
     const message = await window.electron.savePath(pathData);
-    alert(message);
+    toast({ title: message });
   };
 
   useEffect(() => {

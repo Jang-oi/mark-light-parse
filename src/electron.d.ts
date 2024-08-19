@@ -8,7 +8,6 @@ interface PathData {
 interface TemplateData {
   id: number;
   option: string;
-  template: string;
   orderName: string;
   mainName: string;
   characterCount: string;
