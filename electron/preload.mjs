@@ -1,6 +1,9 @@
 import {contextBridge, ipcRenderer} from 'electron'
 
 contextBridge.exposeInMainWorld('electron', {
+  savePath: async (pathData) => {
+    return await ipcRenderer.invoke('savePath', pathData);
+  },
   savePDF: async (templateData, pathData) => {
     return await ipcRenderer.invoke('savePDF', templateData, pathData);
   },

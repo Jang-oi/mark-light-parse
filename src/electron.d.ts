@@ -2,6 +2,7 @@ interface PathData {
   illustratorInstallPath: string;
   aiFilePath: string;
   pdfSavePath: string;
+  excelSavePath: string;
 }
 
 interface TemplateData {
@@ -14,6 +15,7 @@ interface TemplateData {
 }
 
 interface Electron {
+  savePath: (pathData: PathData) => Promise<string>;
   savePDF: (templateData: TemplateData[], pathData: PathData) => Promise<string>;
   getUserConfig: () => Promise<PathData>;
 }

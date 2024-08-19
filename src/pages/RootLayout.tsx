@@ -1,11 +1,19 @@
 import { Separator } from '@/components/ui/separator.tsx';
 import { SidebarNav } from '@/components/common/SidebarNav.tsx';
-import React from "react";
+import React from 'react';
 
 const sidebarNavItems = [
   {
-    title: 'PDF로 저장하기',
+    title: '초기 설정',
     href: '/',
+  },
+  {
+    title: 'PDF로 저장하기',
+    href: '/savePDF',
+  },
+  {
+    title: 'Excel Upload',
+    href: '/excelUpload',
   },
   {
     title: '업데이트 예정 ...',
@@ -17,7 +25,7 @@ interface SettingsLayoutProps {
   children: React.ReactNode;
 }
 
-const MainLayout = ({ children }: SettingsLayoutProps) => {
+const RootLayout = ({ children }: SettingsLayoutProps) => {
   return (
     <div className="hidden space-y-6 p-10 pb-16 md:block">
       <div className="space-y-0.5">
@@ -35,4 +43,4 @@ const MainLayout = ({ children }: SettingsLayoutProps) => {
   );
 };
 
-export default MainLayout;
+export default RootLayout;
