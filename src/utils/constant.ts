@@ -7,3 +7,13 @@ export const TEMPLATES = [
   { id: 6, option: '6', name: '네임스티커_06스타' },
   { id: 7, option: '7', name: '네임스티커_07심플한글네임' },
 ];
+
+export const excelFilterArray = [
+  '_01스마일',
+  '_02파스텔',
+  '_03레인보우',
+  '_04플라워',
+  '_05하트',
+  '_06스타',
+  '_07심플한글네임',
+];

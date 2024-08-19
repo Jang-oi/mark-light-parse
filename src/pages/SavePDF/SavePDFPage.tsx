@@ -19,7 +19,7 @@ import { useConfigStore } from '@/store/configStore.ts';
 import { TEMPLATES } from '@/utils/constant.ts';
 import { toast } from '@/components/ui/use-toast.ts';
 
-interface TemplateData {
+export interface TemplateData {
   id: number;
   option: string;
   orderName: string;

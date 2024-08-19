@@ -33,6 +33,24 @@ export default function setupIpcHandlers() {
     }
   });
 
+  ipcMain.handle('savePDFExcel', async (event, templateData, pathData) => {
+    try {
+      const { illustratorInstallPath, aiFilePath } = pathData;
+      fs.writeFileSync(paramFilePath, JSON.stringify(templateData));
+
+      const extendScriptCommand = `"${illustratorInstallPath}" -r ${scriptPath}`;
+      const aiFileStartCommand = `"${illustratorInstallPath}" "${aiFilePath}"`;
+
+      // Script 실행
+      await execPromise(extendScriptCommand);
+      // Illustrator 파일 시작
+      await execPromise(aiFileStartCommand);
+      return 'PDF 저장 완료';
+    } catch (error) {
+      return `PDF 저장 중 오류 발생: ${error.message}`;
+    }
+  });
+
   ipcMain.handle('getUserConfig', async () => {
     try {
       // 파일이 없으면 빈 파일 생성
