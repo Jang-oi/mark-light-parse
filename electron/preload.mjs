@@ -4,14 +4,14 @@ contextBridge.exposeInMainWorld('electron', {
   savePath: async (pathData) => {
     return await ipcRenderer.invoke('savePath', pathData);
   },
-  savePDF: async (templateData, pathData) => {
+  savePDF: async ({templateData, pathData}) => {
     return await ipcRenderer.invoke('savePDF', templateData, pathData);
   },
   savePDFExcel: async (templateData, pathData) => {
     return await ipcRenderer.invoke('savePDFExcel', templateData, pathData);
   },
-  getUserConfig: async () => {
-    return await ipcRenderer.invoke('getUserConfig');
+  getConfig: async () => {
+    return await ipcRenderer.invoke('getConfig');
   },
 });
 

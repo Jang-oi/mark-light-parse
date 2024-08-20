@@ -1,26 +1,12 @@
-interface PathData {
-  illustratorInstallPath: string;
-  aiFilePath: string;
-  pdfSavePath: string;
-  excelSavePath: string;
+interface Response {
+  success: boolean;
+  message: string;
+  data: Record<string, any>;
 }
-
-interface TemplateData {
-  id: number;
-  option: string;
-  orderName: string;
-  mainName: string;
-  characterCount: string;
-  variantType: string;
-  layerName: string;
-  _orderName: string;
-  _mainName: string;
-}
-
 interface Electron {
-  savePath: (pathData: PathData) => Promise<string>;
-  savePDF: (templateData: TemplateData[], pathData: PathData) => Promise<string>;
-  getUserConfig: () => Promise<PathData>;
+  savePath: (param: Record<string, any>) => Promise<Response>;
+  savePDF: (param: Record<string, any>) => Promise<Response>;
+  getConfig: () => Promise<Response>;
 }
 
 interface IpcRenderer {

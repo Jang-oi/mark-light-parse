@@ -45,7 +45,7 @@ export default function SavePDFPage() {
     _mainName: '',
   };
   const [templateData, setTemplateData] = useState<TemplateData[]>([INIT_TEMPLATE_DATA]);
-  const { pathData } = useConfigStore();
+  const { configData } = useConfigStore();
   const handleAddTemplate = () => {
     if (templateData.length < MAX_TEMPLATES) {
       setTemplateData((prevData) => [...prevData, { ...INIT_TEMPLATE_DATA, id: prevData.length + 1 }]);
@@ -108,8 +108,12 @@ export default function SavePDFPage() {
       return;
     }
 
-    const message = await window.electron.savePDF(templateData, pathData);
-    toast({ title: message });
+    const response = await window.electron.savePDF({ templateData, pathData: configData });
+    if (!response.success) {
+      toast({ variant: 'destructive', title: response.message });
+    } else {
+      toast({ title: response.message });
+    }
   };
 
   return (
