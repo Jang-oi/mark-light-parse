@@ -38,12 +38,6 @@ export default function MainPage() {
             value={configData.pdfSavePath}
             onChange={handlePathChange}
           />
-          <InputField
-            label="Excel Upload 저장 경로"
-            id="excelSavePath"
-            value={configData.excelSavePath}
-            onChange={handlePathChange}
-          />
           <CardFooter className="justify-center">
             <Button variant="outline" onClick={handleSavePath}>
               경로 저장

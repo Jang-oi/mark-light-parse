@@ -36,9 +36,10 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
   const INIT_TYPE = {
     MAX_TEMPLATES: tabVariantType === 'basic' ? 5 : 2,
     INIT_VARIANT_TYPE: tabVariantType === 'basic' ? '1' : '2',
+    VARIANT_TYPE_TEXT: tabVariantType === 'basic' ? '베이직' : '대용량',
   };
 
-  const { MAX_TEMPLATES, INIT_VARIANT_TYPE } = INIT_TYPE;
+  const { MAX_TEMPLATES, INIT_VARIANT_TYPE, VARIANT_TYPE_TEXT } = INIT_TYPE;
   const INIT_TEMPLATE_DATA = {
     id: 1,
     option: '1',
@@ -59,7 +60,7 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
     } else {
       toast({
         variant: 'destructive',
-        title: `최대 ${MAX_TEMPLATES}개의 템플릿만 추가할 수 있습니다.`,
+        title: `${VARIANT_TYPE_TEXT}은 최대 ${MAX_TEMPLATES}개의 템플릿만 추가할 수 있습니다.`,
       });
     }
   };
@@ -132,7 +133,6 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
               <TableHead>주문자 이름</TableHead>
               <TableHead>사용자 이름</TableHead>
               <TableHead className="w-[100px]">글자수</TableHead>
-              <TableHead className="w-[100px]">구분</TableHead>
               <TableHead>삭제</TableHead>
             </TableRow>
           </TableHeader>
@@ -174,21 +174,6 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="3" id="3" />
                       <Label>3</Label>
-                    </div>
-                  </RadioGroup>
-                </TableCell>
-                <TableCell>
-                  <RadioGroup
-                    defaultValue={INIT_TEMPLATE_DATA.variantType}
-                    onValueChange={(value) => handleChange(row.id, 'variantType', value)}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="1" id="basic" />
-                      <Label>일반</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="2" id="extra" />
-                      <Label>대용량</Label>
                     </div>
                   </RadioGroup>
                 </TableCell>

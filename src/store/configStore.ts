@@ -4,7 +4,6 @@ const INIT_CONFIG_DATA = {
   illustratorInstallPath: '',
   aiFilePath: '',
   pdfSavePath: '',
-  excelSavePath: '',
 };
 // 상태 인터페이스 정의
 interface ConfigState {

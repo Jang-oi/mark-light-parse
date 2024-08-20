@@ -97,6 +97,9 @@ if (doc) {
   // JSON 문자열을 JavaScript 객체로 변환 (JSON.parse를 사용할 수 없으므로 직접 처리)
   var params = parseJSON(paramData);
 
+  // 베이직, 대용량에 따라 길이 계산에 필요한 수
+  var variantTypeNumber = 210;
+  if (params[0].variantType === '2') variantTypeNumber = 420;
   // 각 항목 처리
   for (var i = 0; i < params.length; i++) {
     // 주문자 입력 정보
@@ -109,7 +112,7 @@ if (doc) {
 
     var resultLayer = findLayerByName('결과물');
 
-    processLayer(layerName, i * 210, _orderName, orderName, _mainName, mainName, resultLayer);
+    processLayer(layerName, i * variantTypeNumber, _orderName, orderName, _mainName, mainName, resultLayer);
   }
 
   var configFile = new File(configFilePath);

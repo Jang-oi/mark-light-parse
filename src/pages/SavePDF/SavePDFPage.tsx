@@ -6,7 +6,7 @@ export default function SavePDFPage() {
     <>
       <Tabs defaultValue="basic" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="basic">일반</TabsTrigger>
+          <TabsTrigger value="basic">베이직</TabsTrigger>
           <TabsTrigger value="extra">대용량</TabsTrigger>
         </TabsList>
         <TabsContent value="basic">
