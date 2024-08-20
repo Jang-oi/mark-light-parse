@@ -112,7 +112,6 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
     }
   };
 
-  console.log(excelFilteredData);
   return (
     <Card>
       <CardContent />

@@ -41,8 +41,7 @@ export default function setupIpcHandlers() {
     try {
       // 파일이 없으면 빈 파일 생성
       if (!fs.existsSync(configFilePath)) {
-        const initJsonString =
-          '{"illustratorInstallPath": "", "aiFilePath": "", "pdfSavePath": "", "excelSavePath" : ""}';
+        const initJsonString = '{"illustratorInstallPath": "", "aiFilePath": "", "pdfSavePath": ""}';
         fs.writeFileSync(configFilePath, initJsonString, 'utf-8');
       }
       const data = fs.readFileSync(configFilePath, 'utf-8');

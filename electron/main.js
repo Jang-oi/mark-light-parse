@@ -1,5 +1,6 @@
 import { app, BrowserWindow, Tray, Menu, dialog } from 'electron';
 import electronLocalShortcut from 'electron-localshortcut';
+import isDev from 'electron-is-dev';
 import { paths } from './common.js';
 import setupIpcHandlers from './ipcMainService.js';
 
@@ -115,6 +116,7 @@ const createWindow = async () => {
     mainWindow = null;
   });
 
+  if (isDev) mainWindow.webContents.openDevTools({ mode: 'detach' });
   mainWindow.show();
   electronLocalShortcut.register(mainWindow, 'F5', () => {
     mainWindow.reload();
