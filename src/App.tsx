@@ -10,6 +10,7 @@ import { ThemeProvider } from '@/components/theme-provider.tsx';
 import { Toaster } from '@/components/ui/toaster.tsx';
 import { useEffect, useState } from 'react';
 import { useConfigStore } from '@/store/configStore.ts';
+import MarkAlert from '@/components/common/MarkAlert.tsx';
 
 export default function App() {
   const { setConfigData } = useConfigStore();
@@ -40,6 +41,7 @@ export default function App() {
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <RootLayout>
         <Toaster />
+        <MarkAlert />
         <Routes>
           <Route path={'/'} element={<MainPage />}></Route>
           <Route path={'/savePDF'} element={<SavePDFPage />}></Route>

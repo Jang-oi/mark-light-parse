@@ -17,6 +17,12 @@ function savePDFCallBack(defaultPath) {
     doc.close(SaveOptions.DONOTSAVECHANGES);
   }
 }
+
+function generateUniqueFileName(baseName) {
+  var timestamp = new Date().getTime(); // 현재 시간의 유닉스 타임스탬프를 가져옵니다.
+  var extension = '.pdf'; // PDF 확장자
+  return baseName + '_' + timestamp + extension; // 파일 이름에 타임스탬프를 추가합니다.
+}
 function findLayerByName(layerName) {
   var layers = doc.layers;
   for (var i = 0; i < layers.length; i++) {
@@ -113,5 +119,6 @@ if (doc) {
   configFile.close();
 
   var config = parseJSON(configData);
-  savePDFCallBack(config.pdfSavePath);
+  var uniqueFileName = generateUniqueFileName(config.pdfSavePath);
+  savePDFCallBack(uniqueFileName);
 }
