@@ -116,7 +116,7 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
             updatedData[currentIndex].status = response.success ? '성공' : '실패';
           });
 
-          setExcelFilteredData(updatedData); // 상태 업데이트 후 테이블 재렌더링
+          setExcelFilteredData([...updatedData]); // 상태 업데이트 후 테이블 재렌더링
           if (!response.success) throw new Error(response.message);
         }
         return { success: true, message: 'PDF 파일 저장이 완료되었습니다.', data: {} };
