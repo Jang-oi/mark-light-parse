@@ -21,16 +21,12 @@ export default function setupIpcHandlers() {
   // IPC 통신 설정
   ipcMain.handle('savePDF', async (event, templateData, pathData) => {
     try {
-      const { illustratorInstallPath, aiFilePath } = pathData;
+      const { illustratorInstallPath } = pathData;
       fs.writeFileSync(paramFilePath, JSON.stringify(templateData));
 
       const extendScriptCommand = `"${illustratorInstallPath}" -r ${scriptPath}`;
-      const aiFileStartCommand = `"${illustratorInstallPath}" "${aiFilePath}"`;
-
-      // Script 실행
       await execPromise(extendScriptCommand);
-      // Illustrator 파일 시작
-      await execPromise(aiFileStartCommand);
+
       return createResponse(true, 'PDF 저장 완료');
     } catch (error) {
       return createResponse(false, `PDF 저장 중 오류 발생: ${error.message}`);
@@ -41,7 +37,7 @@ export default function setupIpcHandlers() {
     try {
       // 파일이 없으면 빈 파일 생성
       if (!fs.existsSync(configFilePath)) {
-        const initJsonString = '{"illustratorInstallPath": "", "aiFilePath": "", "pdfSavePath": ""}';
+        const initJsonString = '{"illustratorInstallPath": "", "pdfSavePath": ""}';
         fs.writeFileSync(configFilePath, initJsonString, 'utf-8');
       }
       const data = fs.readFileSync(configFilePath, 'utf-8');

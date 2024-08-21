@@ -1,4 +1,6 @@
 var doc = app.activeDocument;
+// 원본 문서의 경로 저장 (나중에 원본을 다시 열기 위함)
+var originalFile = doc.fullName;
 
 function savePDFCallBack(defaultPath) {
   var pdfSavePath = new File(defaultPath);
@@ -6,15 +8,15 @@ function savePDFCallBack(defaultPath) {
   if (pdfSavePath) {
     // PDF 저장 옵션 설정
     var pdfOptions = new PDFSaveOptions();
-    pdfOptions.preserveEditing = true;
-    pdfOptions.preserveEditability = true;
     pdfOptions.compatibility = PDFCompatibility.ACROBAT7;
+    pdfOptions.viewAfterSaving = false;
+    pdfOptions.preserveEditability = true;
 
     // 현재 문서를 PDF로 저장
     doc.saveAs(pdfSavePath, pdfOptions);
-
     // 문서 저장 후 닫기 (저장 후 열리는 문제를 방지)
     doc.close(SaveOptions.DONOTSAVECHANGES);
+    app.open(originalFile);
   }
 }
 

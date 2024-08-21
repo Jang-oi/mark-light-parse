@@ -31,7 +31,6 @@ export default function MainPage() {
             value={configData.illustratorInstallPath}
             onChange={handlePathChange}
           />
-          <InputField label="AI 파일 경로" id="aiFilePath" value={configData.aiFilePath} onChange={handlePathChange} />
           <InputField
             label="PDF 저장 경로"
             id="pdfSavePath"
