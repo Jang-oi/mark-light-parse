@@ -1,8 +1,8 @@
 app.preferences.setBooleanPreference('ShowExternalJSXWarning', false);
 var doc = app.activeDocument;
+
 // 원본 문서의 경로 저장 (나중에 원본을 다시 열기 위함)
 var originalFile = doc.fullName;
-
 function savePDFCallBack(defaultPath) {
   var pdfSavePath = new File(defaultPath);
 
@@ -21,11 +21,6 @@ function savePDFCallBack(defaultPath) {
   }
 }
 
-function generateUniqueFileName(baseName) {
-  var timestamp = new Date().getTime(); // 현재 시간의 유닉스 타임스탬프를 가져옵니다.
-  var extension = '.pdf'; // PDF 확장자
-  return baseName + '_' + timestamp + extension; // 파일 이름에 타임스탬프를 추가합니다.
-}
 function findLayerByName(layerName) {
   var layers = doc.layers;
   for (var i = 0; i < layers.length; i++) {
@@ -36,42 +31,44 @@ function findLayerByName(layerName) {
   return null;
 }
 
-function processLayer(currentLayer, yOffset, _orderName, orderName, _mainName, mainName, targetLayer) {
+function findGroupByName(currentLayer, groupName) {
+  var groups = currentLayer.groupItems;
+  for (var i = 0; i < groups.length; i++) {
+    if (groups[i].name === groupName) {
+      return groups[i];
+    }
+  }
+  return null;
+}
+
+function processLayer(currentLayer, yOffset, _orderName, orderName, _mainName, mainName, resultLayer) {
   var yOffsetPoints = yOffset * 2.83465; // 1mm = 2.83465pt
 
-  var textFrames = currentLayer.textFrames;
-  var textFramesLength = textFrames.length;
+  var mainNames = findGroupByName(currentLayer, 'MainNames');
+  var mainNamesTextFrames = mainNames.textFrames;
+  var mainNamesTextFramesLength = mainNamesTextFrames.length;
 
-  var groups = currentLayer.groupItems;
-  var groupTextFrames = groups[0].textFrames;
-  var groupTextFramesLength = groupTextFrames.length;
-
-  for (var k = 0; k < groupTextFramesLength; k++) {
-    groupTextFrames[k].contents = mainName;
+  for (var i = 0; i < mainNamesTextFramesLength; i++) {
+    mainNamesTextFrames[i].contents = mainName;
   }
 
-  /*    // 텍스트 내용 변경
-      var textFrames = sourceLayer.textFrames;
-      var textFramesLength = textFrames.length;
+  var orderNames = findGroupByName(currentLayer, 'OrderNames');
+  var orderNamesTextFrames = orderNames.textFrames;
+  var orderNamesTextFramesLength = orderNamesTextFrames.length;
 
-      for (var k = 0; k < textFramesLength; k++) {
-        var contents = textFrames[k].contents;
-        if (contents === _orderName) {
-          textFrames[k].contents = orderName;
-        } else if (contents === _mainName) {
-          textFrames[k].contents = mainName;
-        }
-      }
+  for (var j = 0; j < orderNamesTextFramesLength; j++) {
+    orderNamesTextFrames[j].contents = orderName;
+  }
 
-      // 레이어의 모든 객체를 타겟 레이어로 복사 및 Y축 좌표 조정
-      var objects = sourceLayer.pageItems;
-      var length = objects.length;
+  // 레이어의 모든 객체를 타겟 레이어로 복사 및 Y축 좌표 조정
+  var objects = currentLayer.pageItems;
+  var length = objects.length;
 
-      for (var j = length - 1; j >= 0; j--) {
-        var sourceObject = objects[j];
-        var duplicatedObject = sourceObject.duplicate(targetLayer);
-        duplicatedObject.top -= yOffsetPoints;
-      }*/
+  for (var k = length - 1; k >= 0; k--) {
+    var sourceObject = objects[k];
+    var duplicatedObject = sourceObject.duplicate(resultLayer);
+    duplicatedObject.top -= yOffsetPoints;
+  }
 }
 
 function parseJSON(jsonStr) {
@@ -105,6 +102,20 @@ if (doc) {
   // 베이직, 대용량에 따라 길이 계산에 필요한 수
   var variantTypeNumber = 210;
   if (params[0].variantType === '2') variantTypeNumber = 420;
+
+  var pdfName = '';
+  if (!params[0].no) {
+    var now = new Date();
+    var year = now.getFullYear();
+    var month = ('0' + (now.getMonth() + 1)).slice(-2);
+    var day = ('0' + now.getDate()).slice(-2);
+    var hours = ('0' + now.getHours()).slice(-2);
+    var minutes = ('0' + now.getMinutes()).slice(-2);
+    var seconds = ('0' + now.getSeconds()).slice(-2);
+
+    pdfName = year + '' + month + '' + day + ' ' + hours + '' + minutes + '' + seconds;
+  }
+
   // 각 항목 처리
   for (var i = 0; i < params.length; i++) {
     // 주문자 입력 정보
@@ -114,19 +125,20 @@ if (doc) {
 
     var _orderName = params[i]._orderName;
     var _mainName = params[i]._mainName;
+    var no = params[i].no;
 
+    if (no) pdfName += i + 1 === params.length ? no : no + '_';
     var resultLayer = findLayerByName('결과물');
     var currentLayer = findLayerByName(layerName);
     processLayer(currentLayer, i * variantTypeNumber, _orderName, orderName, _mainName, mainName, resultLayer);
   }
 
-  /*  var configFile = new File(configFilePath);
+  var configFile = new File(configFilePath);
 
   configFile.open('r');
   var configData = configFile.read();
   configFile.close();
 
   var config = parseJSON(configData);
-  var uniqueFileName = generateUniqueFileName(config.pdfSavePath);
-  savePDFCallBack(uniqueFileName);*/
+  savePDFCallBack(config.pdfSavePath + pdfName);
 }

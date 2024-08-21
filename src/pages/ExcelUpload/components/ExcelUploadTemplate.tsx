@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Card, CardContent, CardFooter } from '@/components/ui/card.tsx';
+import { Card, CardContent } from '@/components/ui/card.tsx';
 import { excelFilterArray } from '@/utils/constant.ts';
 import { Input } from '@/components/ui/input.tsx';
 import { Label } from '@/components/ui/label.tsx';
@@ -23,7 +23,6 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
   const { configData } = useConfigStore();
   const handleAsyncTask = useHandleAsyncTask();
   const [excelFilteredData, setExcelFilteredData] = useState<any>([]);
-  const [delayTime, setDelayTime] = useState<number>(30);
   // 숫자 추출을 위한 정규 표현식
   const numberPattern = /_(\d{2})/;
 
@@ -55,22 +54,33 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
           excelFilterArray.some((filter) => item['리워드'].includes(filter)),
         );
 
+        // 베이직, 대용량 구분
         const variantTypeFilteredData = templateFilteredData.filter((item: any) =>
           item['리워드'].includes(VARIANT_TYPE_TEXT),
         );
 
+        // 옵션조건 (메인이름) 이 2~3글자인 경우만
+        const characterCountFilteredData = variantTypeFilteredData.filter((item: any) => {
+          const length = item['옵션조건'].length;
+          return length >= 2 && length <= 3;
+        });
+
+        // 수량이 1개인 경우만
+        const countFilteredData = characterCountFilteredData.filter((item: any) => item['수량'] === 1);
+
         // 데이터 변형
-        const resultData = variantTypeFilteredData.map((item: any, rowIndex: number) => {
+        const resultData = countFilteredData.map((item: any, rowIndex: number) => {
           const match = item['리워드'].match(numberPattern);
           // 정규 표현식 매칭이 없는 경우, 빈 값을 반환하여 오류를 방지합니다.
           const option = match ? `${parseInt(match[1], 10)}` : '0';
           const variantType = INIT_VARIANT_TYPE;
-          const characterCount = item['옵션조건'] ? item['옵션조건'].length.toString() : '0';
+          const characterCount = item['옵션조건'].length.toString();
           const commonNameValue =
             option !== '2' ? `${variantType}${option}${characterCount}` : `${variantType}${option}3`;
 
           return {
             id: rowIndex,
+            no: item['No.'],
             template: item['리워드'],
             option,
             orderName: item['받는사람 성명'],
@@ -91,18 +101,22 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
     }
   };
 
-  const handleDelayTime = (e: any) => {
-    setDelayTime(e.target.value);
-  };
-
   const handleSavePDFExcel = async () => {
     await handleAsyncTask({
-      validationFunc: () => delayTime > 0 && excelFilteredData.length > 0,
-      validationMessage: '지연시간이 설정되어야 하며, Excel 파일이 정상적으로 업로드되어야 합니다.',
+      validationFunc: () => excelFilteredData.length > 0,
+      validationMessage: 'Excel 파일이 정상적으로 업로드되어야 합니다.',
       apiFunc: async () => {
+        const updatedData = [...excelFilteredData];
         for (let i = 0; i < excelFilteredData.length; i += MAX_TEMPLATES) {
           const templateData = excelFilteredData.slice(i, i + MAX_TEMPLATES);
           const response = await window.electron.savePDF({ templateData, pathData: configData });
+          // 각 데이터의 상태 업데이트
+          templateData.forEach((_: any, index: number) => {
+            const currentIndex = i + index;
+            updatedData[currentIndex].status = response.success ? '성공' : '실패';
+          });
+
+          setExcelFilteredData(updatedData); // 상태 업데이트 후 테이블 재렌더링
           if (!response.success) throw new Error(response.message);
         }
         return { success: true, message: 'PDF 파일 저장이 완료되었습니다.', data: {} };
@@ -117,13 +131,15 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
       <div className="grid gap-6 m-3">
         <Label htmlFor="excel">Excel Upload</Label>
         <Input id="excel" type="file" accept=".xlsx, .xls, .csv" ref={fileInputRef} onChange={handleDrop} />
-        <Label>딜레이 시간 (베이직5개, 대용량2개 저장 시간으로 추천)</Label>
-        <Input id="delayTime" type="number" defaultValue={delayTime} onChange={handleDelayTime} />
+        <Button className="m-4" onClick={handleSavePDFExcel}>
+          PDF 저장
+        </Button>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>순서</TableHead>
-              <TableHead className="w-[400px]">템플릿</TableHead>
+              <TableHead>No</TableHead>
+              <TableHead className="w-[100px]">성공여부</TableHead>
+              <TableHead className="w-[350px]">템플릿</TableHead>
               <TableHead>주문자 이름</TableHead>
               <TableHead>사용자 이름</TableHead>
               <TableHead className="w-[100px]">글자수</TableHead>
@@ -132,7 +148,8 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
           <TableBody>
             {excelFilteredData.map((filteredItem: any) => (
               <TableRow key={filteredItem.id}>
-                <TableCell>{filteredItem.id + 1}</TableCell>
+                <TableCell>{filteredItem.no}</TableCell>
+                <TableCell>{filteredItem.status}</TableCell>
                 <TableCell>{filteredItem.template}</TableCell>
                 <TableCell>
                   <Input value={filteredItem.orderName} disabled />
@@ -156,11 +173,6 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
             ))}
           </TableBody>
         </Table>
-        <CardFooter className="justify-center">
-          <Button variant="outline" onClick={handleSavePDFExcel}>
-            PDF 저장
-          </Button>
-        </CardFooter>
       </div>
     </Card>
   );
