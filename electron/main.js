@@ -116,7 +116,7 @@ const createWindow = async () => {
     mainWindow = null;
   });
 
-  if (isDev) mainWindow.webContents.openDevTools({ mode: 'detach' });
+  // if (isDev) mainWindow.webContents.openDevTools({ mode: 'detach' });
   mainWindow.show();
   electronLocalShortcut.register(mainWindow, 'F5', () => {
     mainWindow.reload();

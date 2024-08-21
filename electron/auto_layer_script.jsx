@@ -36,15 +36,21 @@ function findLayerByName(layerName) {
   return null;
 }
 
-function processLayer(layerName, yOffset, _orderName, orderName, _mainName, mainName, targetLayer) {
-  var layers = doc.layers;
+function processLayer(currentLayer, yOffset, _orderName, orderName, _mainName, mainName, targetLayer) {
   var yOffsetPoints = yOffset * 2.83465; // 1mm = 2.83465pt
 
-  for (var i = 0; i < layers.length; i++) {
-    if (layers[i].name === layerName) {
-      var sourceLayer = layers[i];
+  var textFrames = currentLayer.textFrames;
+  var textFramesLength = textFrames.length;
 
-      // 텍스트 내용 변경
+  var groups = currentLayer.groupItems;
+  var groupTextFrames = groups[0].textFrames;
+  var groupTextFramesLength = groupTextFrames.length;
+
+  for (var k = 0; k < groupTextFramesLength; k++) {
+    groupTextFrames[k].contents = mainName;
+  }
+
+  /*    // 텍스트 내용 변경
       var textFrames = sourceLayer.textFrames;
       var textFramesLength = textFrames.length;
 
@@ -65,11 +71,7 @@ function processLayer(layerName, yOffset, _orderName, orderName, _mainName, main
         var sourceObject = objects[j];
         var duplicatedObject = sourceObject.duplicate(targetLayer);
         duplicatedObject.top -= yOffsetPoints;
-      }
-
-      return; // 레이어를 찾고 작업을 완료한 후 함수 종료
-    }
-  }
+      }*/
 }
 
 function parseJSON(jsonStr) {
@@ -114,11 +116,11 @@ if (doc) {
     var _mainName = params[i]._mainName;
 
     var resultLayer = findLayerByName('결과물');
-
-    processLayer(layerName, i * variantTypeNumber, _orderName, orderName, _mainName, mainName, resultLayer);
+    var currentLayer = findLayerByName(layerName);
+    processLayer(currentLayer, i * variantTypeNumber, _orderName, orderName, _mainName, mainName, resultLayer);
   }
 
-  var configFile = new File(configFilePath);
+  /*  var configFile = new File(configFilePath);
 
   configFile.open('r');
   var configData = configFile.read();
@@ -126,5 +128,5 @@ if (doc) {
 
   var config = parseJSON(configData);
   var uniqueFileName = generateUniqueFileName(config.pdfSavePath);
-  savePDFCallBack(uniqueFileName);
+  savePDFCallBack(uniqueFileName);*/
 }
