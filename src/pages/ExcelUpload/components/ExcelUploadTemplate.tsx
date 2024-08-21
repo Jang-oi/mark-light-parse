@@ -9,6 +9,7 @@ import { toast } from '@/components/ui/use-toast.ts';
 import * as XLSX from 'xlsx';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group.tsx';
+import { useHandleAsyncTask } from '@/utils/handleAsyncTask.ts';
 
 const ExcelUploadTemplate = ({ tabVariantType }: any) => {
   const INIT_TYPE = {
@@ -20,6 +21,7 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { configData } = useConfigStore();
+  const handleAsyncTask = useHandleAsyncTask();
   const [excelFilteredData, setExcelFilteredData] = useState<any>([]);
   const [delayTime, setDelayTime] = useState<number>(30);
   // 숫자 추출을 위한 정규 표현식
@@ -94,22 +96,19 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
   };
 
   const handleSavePDFExcel = async () => {
-    if (delayTime <= 0) {
-      toast({ variant: 'destructive', title: '지연시간이 설정되어야 합니다.' });
-      return;
-    }
-    if (excelFilteredData.length <= 0) {
-      toast({ variant: 'destructive', title: 'Excel 파일이 비정상적이거나 업로드 되지 않았습니다.' });
-      return;
-    }
-
-    for (let i = 0; i < excelFilteredData.length; i += MAX_TEMPLATES) {
-      const templateData = excelFilteredData.slice(i, i + MAX_TEMPLATES);
-      await window.electron.savePDF({ templateData, pathData: configData });
-      if (i + MAX_TEMPLATES < excelFilteredData.length) {
-        await new Promise((resolve) => setTimeout(resolve, delayTime * 1000));
-      }
-    }
+    await handleAsyncTask({
+      validationFunc: () => delayTime > 0 && excelFilteredData.length > 0,
+      validationMessage: '지연시간이 설정되어야 하며, Excel 파일이 정상적으로 업로드되어야 합니다.',
+      apiFunc: async () => {
+        for (let i = 0; i < excelFilteredData.length; i += MAX_TEMPLATES) {
+          const templateData = excelFilteredData.slice(i, i + MAX_TEMPLATES);
+          const response = await window.electron.savePDF({ templateData, pathData: configData });
+          if (!response.success) throw new Error(response.message);
+        }
+        return { success: true, message: 'PDF 파일 저장이 완료되었습니다.', data: {} };
+      },
+      alertOptions: {},
+    });
   };
 
   return (

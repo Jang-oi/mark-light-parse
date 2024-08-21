@@ -2,24 +2,21 @@ import { useConfigStore } from '@/store/configStore.ts';
 import { Card, CardContent, CardFooter } from '@/components/ui/card.tsx';
 import InputField from '@/components/common/InputField.tsx';
 import { Button } from '@/components/ui/button.tsx';
-import { useToast } from '@/components/ui/use-toast.ts';
+import { useHandleAsyncTask } from '@/utils/handleAsyncTask.ts';
 
 export default function MainPage() {
   const { configData, setConfigData } = useConfigStore();
-  const { toast } = useToast();
+  const handleAsyncTask = useHandleAsyncTask();
 
   const handlePathChange = (e: any) => {
     const { id, value } = e.target;
     setConfigData({ [id]: value });
   };
+
   const handleSavePath = async () => {
-    const response = await window.electron.savePath(configData);
-    if (!response.success) {
-      toast({ variant: 'destructive', title: response.message });
-    } else {
-      toast({ title: response.message });
-    }
+    await handleAsyncTask({ apiFunc: () => window.electron.savePath(configData) });
   };
+
   return (
     <>
       <Card>

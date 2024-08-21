@@ -17,8 +17,8 @@ import { Label } from '@/components/ui/label.tsx';
 import { Button } from '@/components/ui/button.tsx';
 import { PlusCircle } from 'lucide-react';
 import { useConfigStore } from '@/store/configStore.ts';
-import { useAlertStore } from '@/store/alertStore.ts';
 import { toast } from '@/components/ui/use-toast.ts';
+import { useHandleAsyncTask } from '@/utils/handleAsyncTask.ts';
 
 export interface TemplateData {
   id: number;
@@ -52,8 +52,8 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
     _mainName: '',
   };
   const [templateData, setTemplateData] = useState<TemplateData[]>([INIT_TEMPLATE_DATA]);
+  const handleAsyncTask = useHandleAsyncTask();
   const { configData } = useConfigStore();
-  const { setAlert } = useAlertStore();
   const handleAddTemplate = () => {
     if (templateData.length < MAX_TEMPLATES) {
       setTemplateData((prevData) => [...prevData, { ...INIT_TEMPLATE_DATA, id: prevData.length + 1 }]);
@@ -99,30 +99,22 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
   };
 
   const handleSavePDF = async () => {
-    const isValid = templateData.every((row) => {
-      // 모든 필드가 입력되었는지 확인
-      const allFieldsFilled = row.orderName !== '' && row.mainName !== '';
-      // 사용자 이름의 길이가 선택한 글자 수와 일치하는지 확인
-      const correctUserNameLength = row.mainName.length === parseInt(row.characterCount);
-      return allFieldsFilled && correctUserNameLength;
-    });
-
-    if (!isValid) {
-      toast({
-        variant: 'destructive',
-        title: '모든 필드를 올바르게 입력해 주세요.',
-        description: '사용자 이름의 길이는 선택한 글자 수와 일치해야 합니다.',
+    const isValidTemplateData = (templateData: any) => {
+      return templateData.every((templateItem: any) => {
+        const allFieldsFilled = templateItem.orderName !== '' && templateItem.mainName !== '';
+        const correctUserNameLength = templateItem.mainName.length === parseInt(templateItem.characterCount);
+        return allFieldsFilled && correctUserNameLength;
       });
-      return;
-    }
+    };
 
-    const response = await window.electron.savePDF({ templateData, pathData: configData });
-    if (!response.success) {
-      toast({ variant: 'destructive', title: response.message });
-    } else {
-      setAlert({ title: response.message });
-    }
+    await handleAsyncTask({
+      validationFunc: () => isValidTemplateData(templateData),
+      validationMessage: '사용자 이름의 길이는 선택한 글자 수와 일치해야 합니다.',
+      apiFunc: () => window.electron.savePDF({ templateData, pathData: configData }),
+      alertOptions: {},
+    });
   };
+
   return (
     <Card className="w-full">
       <CardContent>

@@ -1,3 +1,4 @@
+app.preferences.setBooleanPreference('ShowExternalJSXWarning', false);
 var doc = app.activeDocument;
 // 원본 문서의 경로 저장 (나중에 원본을 다시 열기 위함)
 var originalFile = doc.fullName;
