@@ -1,6 +1,6 @@
 import isDev from 'electron-is-dev';
 import path from 'node:path';
-import {exec} from "child_process";
+import { exec } from 'child_process';
 const __dirname = path.resolve();
 
 const basePaths = {
@@ -32,4 +32,4 @@ export const execPromise = (command) => {
       }
     });
   });
-}
+};

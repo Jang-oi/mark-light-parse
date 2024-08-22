@@ -75,8 +75,9 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
           const option = match ? `${parseInt(match[1], 10)}` : '0';
           const variantType = INIT_VARIANT_TYPE;
           const characterCount = item['옵션조건'].length.toString();
-          const commonNameValue =
-            option !== '2' ? `${variantType}${option}${characterCount}` : `${variantType}${option}3`;
+
+          let commonNameValue = `${variantType}${option}${characterCount}`;
+          if (option !== '2') commonNameValue = `${variantType}${option}3`;
 
           return {
             id: rowIndex,
