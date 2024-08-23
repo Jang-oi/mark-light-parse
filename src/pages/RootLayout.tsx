@@ -2,6 +2,7 @@ import { Separator } from '@/components/ui/separator.tsx';
 import SidebarNav from '@/components/common/SidebarNav.tsx';
 import React from 'react';
 import ModeToggle from '@/components/common/ModeToggle.tsx';
+import AutoUpdatePage from '@/pages/AutoUpdate/AutoUpdate.tsx';
 
 const sidebarNavItems = [
   {
@@ -9,24 +10,21 @@ const sidebarNavItems = [
     href: '/',
   },
   {
-    title: 'PDF로 저장하기',
+    title: '소량 작업용',
     href: '/savePDF',
   },
   {
-    title: 'Excel Upload',
+    title: '대량 작업용',
     href: '/excelUpload',
-  },
-  {
-    title: '업데이트 예정 ...',
-    href: '/holding',
   },
 ];
 
 interface SettingsLayoutProps {
   children: React.ReactNode;
+  isUpdate: boolean;
 }
 
-const RootLayout = ({ children }: SettingsLayoutProps) => {
+const RootLayout = ({ children, isUpdate }: SettingsLayoutProps) => {
   return (
     <div className="hidden space-y-6 p-10 pb-16 md:block">
       <div className="flex justify-between items-center">
@@ -36,14 +34,17 @@ const RootLayout = ({ children }: SettingsLayoutProps) => {
         </div>
         <ModeToggle />
       </div>
-
       <Separator className="my-6" />
-      <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-14 lg:space-y-0">
-        <aside className="-mx-4 lg:w-1/5">
-          <SidebarNav items={sidebarNavItems} />
-        </aside>
-        <div className="flex-1">{children}</div>
-      </div>
+      {isUpdate ? (
+        <AutoUpdatePage />
+      ) : (
+        <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-14 lg:space-y-0">
+          <aside className="-mx-4 lg:w-1/5">
+            <SidebarNav items={sidebarNavItems} />
+          </aside>
+          <div className="flex-1">{children}</div>
+        </div>
+      )}
     </div>
   );
 };

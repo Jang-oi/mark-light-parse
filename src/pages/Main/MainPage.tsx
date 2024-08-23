@@ -35,7 +35,7 @@ export default function MainPage() {
             onChange={handlePathChange}
           />
           <CardFooter className="justify-center">
-            <Button variant="outline" onClick={handleSavePath}>
+            <Button className="w-full" onClick={handleSavePath}>
               경로 저장
             </Button>
           </CardFooter>

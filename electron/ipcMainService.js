@@ -2,13 +2,17 @@ import { ipcMain } from 'electron';
 import { execPromise, paths } from './common.js';
 import fs from 'fs';
 
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { autoUpdater } = require('electron-updater');
+
 const { paramFilePath, scriptPath, configFilePath } = paths;
 const createResponse = (success, message = '', data = {}) => ({
   success,
   message,
   data,
 });
-export default function setupIpcHandlers() {
+export function setupIpcHandlers() {
   ipcMain.handle('savePath', async (event, pathData) => {
     try {
       fs.writeFileSync(configFilePath, JSON.stringify(pathData));
@@ -45,5 +49,34 @@ export default function setupIpcHandlers() {
     } catch (error) {
       return createResponse(false, `경로 조회 중 오류 발생: ${error.message}`);
     }
+  });
+}
+
+export function setupAutoUpdateHandlers(mainWindow, app) {
+  // 업데이트 할 신규 버전이 없을 시 호출 됨
+  autoUpdater.on('update-not-available', () => {
+    mainWindow.webContents.send('update-available', '신규 버전 없음');
+  });
+
+  // 업데이트 확인 중 에러 발생 시 호출 됨
+  autoUpdater.on('error', (err) => {
+    mainWindow.webContents.send('update-available', err);
+  });
+
+  // 업데이트 할 신규 버전이 있을 시 호출 됨
+  autoUpdater.on('update-available', () => {
+    mainWindow.webContents.send('update-available', { isUpdate: true });
+  });
+
+  // 업데이트 설치 파일 다운로드 상태 수신
+  // 해당 단계까지 자동으로 진행 됨
+  autoUpdater.on('download-progress', (progressObj) => {
+    mainWindow.webContents.send('download-progress', progressObj);
+  });
+
+  // 업데이트 설치 파일 다운로드 완료 시 업데이트 진행 여부 선택
+  autoUpdater.on('update-downloaded', () => {
+    app.isQuiting = true;
+    autoUpdater.quitAndInstall();
   });
 }

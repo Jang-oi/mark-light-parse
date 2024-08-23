@@ -102,8 +102,6 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
     });
   };
 
-  console.log(templateData);
-
   return (
     <Card className="w-full">
       <CardContent>
@@ -166,7 +164,7 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
         </Button>
       </CardFooter>
       <CardFooter className="justify-center">
-        <Button variant="outline" onClick={handleSavePDF}>
+        <Button className="m-4 w-full" onClick={handleSavePDF}>
           PDF 저장
         </Button>
       </CardFooter>
