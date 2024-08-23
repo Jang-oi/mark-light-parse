@@ -12,25 +12,12 @@ import {
 } from '@/components/ui/select.tsx';
 import { TEMPLATES } from '@/utils/constant.ts';
 import { Input } from '@/components/ui/input.tsx';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group.tsx';
-import { Label } from '@/components/ui/label.tsx';
 import { Button } from '@/components/ui/button.tsx';
 import { PlusCircle } from 'lucide-react';
 import { useConfigStore } from '@/store/configStore.ts';
 import { toast } from '@/components/ui/use-toast.ts';
 import { useHandleAsyncTask } from '@/utils/handleAsyncTask.ts';
-
-export interface TemplateData {
-  id: number;
-  option: string;
-  orderName: string;
-  mainName: string;
-  characterCount: string;
-  variantType: string;
-  layerName: string;
-  _orderName: string;
-  _mainName: string;
-}
+import { TemplateData } from '@/types/templateTypes.ts';
 
 const SavePDFTemplate = ({ tabVariantType }: any) => {
   const INIT_TYPE = {
@@ -42,10 +29,11 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
   const { MAX_TEMPLATES, INIT_VARIANT_TYPE, VARIANT_TYPE_TEXT } = INIT_TYPE;
   const INIT_TEMPLATE_DATA = {
     id: 1,
-    option: '1',
+    option: '',
     orderName: '',
     mainName: '',
     characterCount: '3',
+    fundingNumber: '',
     variantType: INIT_VARIANT_TYPE,
     layerName: '',
     _orderName: '',
@@ -74,7 +62,7 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
       prevData.map((row) => {
         if (row.id === id) {
           let updatedRow = { ...row, [field]: value };
-          const { variantType, option, characterCount } = updatedRow;
+          updatedRow['characterCount'] = updatedRow.mainName.length.toString();
           // 한글만 포함된 문자열 추출
           if (field === 'orderName' || field === 'mainName') {
             const koreanRegex = /[ㄱ-ㅎㅏ-ㅣ가-힣]/g;
@@ -83,6 +71,7 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
             if (koreanOnly.length > 3) return row;
             updatedRow[field] = koreanOnly;
           } else {
+            const { variantType, option, characterCount } = updatedRow;
             let commonNameValue = `${variantType}${option}${characterCount}`;
             if (option !== '2') commonNameValue = `${variantType}${option}3`;
 
@@ -101,19 +90,19 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
   const handleSavePDF = async () => {
     const isValidTemplateData = (templateData: any) => {
       return templateData.every((templateItem: any) => {
-        const allFieldsFilled = templateItem.orderName !== '' && templateItem.mainName !== '';
-        const correctUserNameLength = templateItem.mainName.length === parseInt(templateItem.characterCount);
-        return allFieldsFilled && correctUserNameLength;
+        return templateItem.orderName !== '' && templateItem.mainName !== '' && templateItem.option !== '';
       });
     };
 
     await handleAsyncTask({
       validationFunc: () => isValidTemplateData(templateData),
-      validationMessage: '사용자 이름의 길이는 선택한 글자 수와 일치해야 합니다.',
+      validationMessage: '템플릿, 수령자, 인쇄문구은 필수 입니다.',
       apiFunc: () => window.electron.savePDF({ templateData, pathData: configData }),
       alertOptions: {},
     });
   };
+
+  console.log(templateData);
 
   return (
     <Card className="w-full">
@@ -121,10 +110,10 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[250px]">템플릿</TableHead>
-              <TableHead>주문자 이름</TableHead>
-              <TableHead>사용자 이름</TableHead>
-              <TableHead className="w-[100px]">글자수</TableHead>
+              <TableHead>템플릿</TableHead>
+              <TableHead>수령자</TableHead>
+              <TableHead>인쇄문구</TableHead>
+              <TableHead>펀딩번호</TableHead>
               <TableHead>삭제</TableHead>
             </TableRow>
           </TableHeader>
@@ -155,19 +144,10 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
                   <Input value={row.mainName} onChange={(e) => handleChange(row.id, 'mainName', e.target.value)} />
                 </TableCell>
                 <TableCell>
-                  <RadioGroup
-                    defaultValue={'3'}
-                    onValueChange={(value) => handleChange(row.id, 'characterCount', value)}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="2" id="2" />
-                      <Label>2</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="3" id="3" />
-                      <Label>3</Label>
-                    </div>
-                  </RadioGroup>
+                  <Input
+                    value={row.fundingNumber}
+                    onChange={(e) => handleChange(row.id, 'fundingNumber', e.target.value)}
+                  />
                 </TableCell>
                 <TableCell>
                   <Button variant="destructive" onClick={() => handleDeleteRow(row.id)}>

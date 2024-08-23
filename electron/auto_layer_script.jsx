@@ -41,7 +41,14 @@ function findGroupByName(currentLayer, groupName) {
   return null;
 }
 
-function processLayer(currentLayer, yOffset, _orderName, orderName, _mainName, mainName, resultLayer) {
+function processLayer(processParam) {
+  var yOffset = processParam['yOffset'];
+  var currentLayer = processParam['currentLayer'];
+  var orderName = processParam['orderName'];
+  var mainName = processParam['mainName'];
+  var resultLayer = processParam['resultLayer'];
+  var fundingNumber = processParam['fundingNumber'];
+
   var yOffsetPoints = yOffset * 2.83465; // 1mm = 2.83465pt
 
   var mainNames = findGroupByName(currentLayer, 'MainNames');
@@ -60,12 +67,21 @@ function processLayer(currentLayer, yOffset, _orderName, orderName, _mainName, m
     orderNamesTextFrames[j].contents = orderName;
   }
 
+  var fundingNumberGroup = findGroupByName(currentLayer, 'fundingNumber');
+  if (fundingNumberGroup) {
+    var fundingNumberTextFrames = fundingNumberGroup.textFrames;
+    var fundingNumberTextFramesLength = fundingNumberTextFrames.length;
+
+    for (var k = 0; k < fundingNumberTextFramesLength; k++) {
+      fundingNumberTextFrames[j].contents = fundingNumber;
+    }
+  }
   // 레이어의 모든 객체를 타겟 레이어로 복사 및 Y축 좌표 조정
   var objects = currentLayer.pageItems;
   var length = objects.length;
 
-  for (var k = length - 1; k >= 0; k--) {
-    var sourceObject = objects[k];
+  for (var l = length - 1; l >= 0; l--) {
+    var sourceObject = objects[l];
     var duplicatedObject = sourceObject.duplicate(resultLayer);
     duplicatedObject.top -= yOffsetPoints;
   }
@@ -116,21 +132,24 @@ if (doc) {
     pdfName = year + '' + month + '' + day + ' ' + hours + '' + minutes + '' + seconds;
   }
 
+  var resultLayer = findLayerByName('결과물');
   // 각 항목 처리
   for (var i = 0; i < params.length; i++) {
-    // 주문자 입력 정보
-    var layerName = params[i].layerName;
-    var orderName = params[i].orderName;
-    var mainName = params[i].mainName;
-
-    var _orderName = params[i]._orderName;
-    var _mainName = params[i]._mainName;
     var no = params[i].no;
-
     if (no) pdfName += i + 1 === params.length ? no : no + '_';
-    var resultLayer = findLayerByName('결과물');
-    var currentLayer = findLayerByName(layerName);
-    processLayer(currentLayer, i * variantTypeNumber, _orderName, orderName, _mainName, mainName, resultLayer);
+
+    var processParam = {
+      currentLayer: findLayerByName(params[i].layerName),
+      yOffset: i * variantTypeNumber,
+      _orderName: params[i]._orderName,
+      orderName: params[i].orderName,
+      _mainName: params[i]._mainName,
+      mainName: params[i].mainName,
+      fundingNumber: params[i].fundingNumber,
+      resultLayer: resultLayer,
+    };
+
+    processLayer(processParam);
   }
 
   var configFile = new File(configFilePath);

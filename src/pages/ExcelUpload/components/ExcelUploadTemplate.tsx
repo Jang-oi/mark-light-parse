@@ -8,8 +8,8 @@ import { useConfigStore } from '@/store/configStore.ts';
 import { toast } from '@/components/ui/use-toast.ts';
 import * as XLSX from 'xlsx';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group.tsx';
 import { useHandleAsyncTask } from '@/utils/handleAsyncTask.ts';
+import { ExcelTemplateData } from '@/types/templateTypes.ts';
 
 const ExcelUploadTemplate = ({ tabVariantType }: any) => {
   const INIT_TYPE = {
@@ -22,7 +22,7 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { configData } = useConfigStore();
   const handleAsyncTask = useHandleAsyncTask();
-  const [excelFilteredData, setExcelFilteredData] = useState<any>([]);
+  const [excelFilteredData, setExcelFilteredData] = useState<ExcelTemplateData[]>([]);
   // 숫자 추출을 위한 정규 표현식
   const numberPattern = /_(\d{2})/;
 
@@ -60,10 +60,7 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
         );
 
         // 옵션조건 (메인이름) 이 2~3글자인 경우만
-        const characterCountFilteredData = variantTypeFilteredData.filter((item: any) => {
-          const length = item['옵션조건'].length;
-          return length >= 2 && length <= 3;
-        });
+        const characterCountFilteredData = variantTypeFilteredData.filter((item: any) => item['옵션조건'].length <= 4);
 
         // 수량이 1개인 경우만
         const countFilteredData = characterCountFilteredData.filter((item: any) => item['수량'] === 1);
@@ -86,6 +83,7 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
             option,
             orderName: item['받는사람 성명'],
             mainName: item['옵션조건'],
+            fundingNumber: item['펀딩번호'],
             characterCount,
             variantType,
             layerName: commonNameValue,
@@ -107,17 +105,9 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
       validationFunc: () => excelFilteredData.length > 0,
       validationMessage: 'Excel 파일이 정상적으로 업로드되어야 합니다.',
       apiFunc: async () => {
-        const updatedData = [...excelFilteredData];
         for (let i = 0; i < excelFilteredData.length; i += MAX_TEMPLATES) {
           const templateData = excelFilteredData.slice(i, i + MAX_TEMPLATES);
           const response = await window.electron.savePDF({ templateData, pathData: configData });
-          // 각 데이터의 상태 업데이트
-          templateData.forEach((_: any, index: number) => {
-            const currentIndex = i + index;
-            updatedData[currentIndex].status = response.success ? '성공' : '실패';
-          });
-
-          setExcelFilteredData([...updatedData]); // 상태 업데이트 후 테이블 재렌더링
           if (!response.success) throw new Error(response.message);
         }
         return { success: true, message: 'PDF 파일 저장이 완료되었습니다.', data: {} };
@@ -139,18 +129,16 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
           <TableHeader>
             <TableRow>
               <TableHead>No</TableHead>
-              <TableHead className="w-[100px]">성공여부</TableHead>
               <TableHead className="w-[350px]">템플릿</TableHead>
-              <TableHead>주문자 이름</TableHead>
-              <TableHead>사용자 이름</TableHead>
-              <TableHead className="w-[100px]">글자수</TableHead>
+              <TableHead>수령자</TableHead>
+              <TableHead>인쇄문구</TableHead>
+              <TableHead>펀딩번호</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {excelFilteredData.map((filteredItem: any) => (
               <TableRow key={filteredItem.id}>
                 <TableCell>{filteredItem.no}</TableCell>
-                <TableCell>{filteredItem.status}</TableCell>
                 <TableCell>{filteredItem.template}</TableCell>
                 <TableCell>
                   <Input value={filteredItem.orderName} disabled />
@@ -159,16 +147,7 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
                   <Input value={filteredItem.mainName} disabled />
                 </TableCell>
                 <TableCell>
-                  <RadioGroup defaultValue={filteredItem.characterCount} disabled>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="2" id="2" />
-                      <Label>2</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="3" id="3" />
-                      <Label>3</Label>
-                    </div>
-                  </RadioGroup>
+                  <Input value={filteredItem.fundingNumber} disabled />
                 </TableCell>
               </TableRow>
             ))}
