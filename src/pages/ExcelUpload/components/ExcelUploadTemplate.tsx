@@ -59,8 +59,11 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
           item['리워드'].includes(VARIANT_TYPE_TEXT),
         );
 
-        // 옵션조건 (메인이름) 이 2~3글자인 경우만
-        const characterCountFilteredData = variantTypeFilteredData.filter((item: any) => item['옵션조건'].length <= 4);
+        // 옵션조건에서 공백 제거 후 길이를 계산하여 4글자 이하인 경우만
+        const characterCountFilteredData = variantTypeFilteredData.filter((item: any) => {
+          const cleanedOption = item['옵션조건'].replace(/\s+/g, ''); // 모든 공백 제거
+          return cleanedOption.length <= 4;
+        });
 
         // 수량이 1개인 경우만
         const countFilteredData = characterCountFilteredData.filter((item: any) => item['수량'] === 1);
@@ -71,7 +74,8 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
           // 정규 표현식 매칭이 없는 경우, 빈 값을 반환하여 오류를 방지합니다.
           const option = match ? `${parseInt(match[1], 10)}` : '0';
           const variantType = INIT_VARIANT_TYPE;
-          const characterCount = item['옵션조건'].length.toString();
+          const mainName = item['옵션조건'].replace(/\s+/g, ''); // 공백 제거
+          const characterCount = mainName.length.toString();
 
           let commonNameValue = `${variantType}${option}${characterCount}`;
           if (option !== '2') commonNameValue = `${variantType}${option}3`;
@@ -82,7 +86,7 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
             template: item['리워드'],
             option,
             orderName: item['받는사람 성명'],
-            mainName: item['옵션조건'],
+            mainName,
             fundingNumber: item['펀딩번호'],
             characterCount,
             variantType,
