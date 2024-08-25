@@ -7,6 +7,9 @@ contextBridge.exposeInMainWorld('electron', {
   savePDF: async ({templateData, pathData}) => {
     return await ipcRenderer.invoke('savePDF', templateData, pathData);
   },
+  saveTIFF: async ({pdfFileData,pathData}) => {
+    return await ipcRenderer.invoke('saveTIFF', pdfFileData, pathData);
+  },
   getConfig: async () => {
     return await ipcRenderer.invoke('getConfig');
   },

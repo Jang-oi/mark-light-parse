@@ -1,9 +1,9 @@
 import { Route, Routes } from 'react-router-dom';
 
 import RootLayout from '@/pages/RootLayout.tsx';
-import MainPage from '@/pages/Main/MainPage.tsx';
-import ExcelUploadPage from '@/pages/ExcelUpload/ExcelUploadPage.tsx';
-import SavePDFPage from '@/pages/SavePDF/SavePDFPage.tsx';
+import SetupPage from '@/pages/Setup/SetupPage.tsx';
+import SaveBulkExcelPage from '@/pages/PDF/SaveBulk/SaveBulkExcelPage.tsx';
+import SaveSinglePage from '@/pages/PDF/SaveSingle/SaveSinglePage.tsx';
 import { ThemeProvider } from '@/components/theme-provider.tsx';
 import { Toaster } from '@/components/ui/toaster.tsx';
 import { useEffect, useState } from 'react';
@@ -12,6 +12,7 @@ import LoadingModal from '@/components/common/LoadingModal.tsx';
 
 import { useConfigStore } from '@/store/configStore.ts';
 import { useLoadingStore } from '@/store/loadingStore.ts';
+import SaveTiffPage from '@/pages/TIFF/SaveTiffPage.tsx';
 
 export default function App() {
   const { setConfigData } = useConfigStore();
@@ -45,9 +46,10 @@ export default function App() {
         <MarkAlert />
         <LoadingModal />
         <Routes>
-          <Route path={'/'} element={<MainPage />}></Route>
-          <Route path={'/savePDF'} element={<SavePDFPage />}></Route>
-          <Route path={'/excelUpload'} element={<ExcelUploadPage />}></Route>
+          <Route path={'/'} element={<SetupPage />} />
+          <Route path={'/pdf/save-single'} element={<SaveSinglePage />} />
+          <Route path={'/pdf/save-bulk'} element={<SaveBulkExcelPage />} />
+          <Route path={'/tiff/save'} element={<SaveTiffPage />} />
         </Routes>
       </RootLayout>
     </ThemeProvider>

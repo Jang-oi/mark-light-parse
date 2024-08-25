@@ -21,7 +21,7 @@ export function useHandleAsyncTask() {
       closeCallBack?: () => Promise<any>;
     };
   }) => {
-    if (validationFunc && !validationFunc()) {
+    if (validationFunc && validationFunc()) {
       toast({
         variant: 'destructive',
         title: '유효성 검사 실패',

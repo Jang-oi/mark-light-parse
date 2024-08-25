@@ -1,7 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
-import ExcelUploadTemplate from '@/pages/ExcelUpload/components/ExcelUploadTemplate.tsx';
+import SaveSingleTemplate from '@/pages/PDF/SaveSingle/SaveSingleTemplate.tsx';
 
-const ExcelUploadPage = () => {
+export default function SaveSinglePage() {
   return (
     <>
       <Tabs defaultValue="basic" className="w-full">
@@ -10,14 +10,12 @@ const ExcelUploadPage = () => {
           <TabsTrigger value="extra">대용량</TabsTrigger>
         </TabsList>
         <TabsContent value="basic">
-          <ExcelUploadTemplate tabVariantType="basic" />
+          <SaveSingleTemplate tabVariantType="basic" />
         </TabsContent>
         <TabsContent value="extra">
-          <ExcelUploadTemplate tabVariantType="extra" />
+          <SaveSingleTemplate tabVariantType="extra" />
         </TabsContent>
       </Tabs>
     </>
   );
-};
-
-export default ExcelUploadPage;
+}

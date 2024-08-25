@@ -19,7 +19,7 @@ import { toast } from '@/components/ui/use-toast.ts';
 import { useHandleAsyncTask } from '@/utils/handleAsyncTask.ts';
 import { TemplateData } from '@/types/templateTypes.ts';
 
-const SavePDFTemplate = ({ tabVariantType }: any) => {
+const SaveSingleTemplate = ({ tabVariantType }: any) => {
   const INIT_TYPE = {
     MAX_TEMPLATES: tabVariantType === 'basic' ? 5 : 2,
     INIT_VARIANT_TYPE: tabVariantType === 'basic' ? '1' : '2',
@@ -62,7 +62,6 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
       prevData.map((row) => {
         if (row.id === id) {
           let updatedRow = { ...row, [field]: value };
-          updatedRow['characterCount'] = updatedRow.mainName.length.toString();
           // 한글만 포함된 문자열 추출
           if (field === 'orderName' || field === 'mainName') {
             const koreanRegex = /[ㄱ-ㅎㅏ-ㅣ가-힣]/g;
@@ -70,15 +69,15 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
 
             if (koreanOnly.length > 3) return row;
             updatedRow[field] = koreanOnly;
-          } else {
-            const { variantType, option, characterCount } = updatedRow;
-            let commonNameValue = `${variantType}${option}${characterCount}`;
-            if (option !== '2') commonNameValue = `${variantType}${option}3`;
-
-            updatedRow['layerName'] = commonNameValue;
-            updatedRow['_orderName'] = `N${commonNameValue}`;
-            updatedRow['_mainName'] = commonNameValue;
+            updatedRow['characterCount'] = updatedRow.mainName.length.toString();
           }
+          const { variantType, option, characterCount } = updatedRow;
+          let commonNameValue = `${variantType}${option}${characterCount}`;
+          if (option !== '2') commonNameValue = `${variantType}${option}3`;
+
+          updatedRow['layerName'] = commonNameValue;
+          updatedRow['_orderName'] = `N${commonNameValue}`;
+          updatedRow['_mainName'] = commonNameValue;
 
           return updatedRow;
         }
@@ -89,8 +88,8 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
 
   const handleSavePDF = async () => {
     const isValidTemplateData = (templateData: any) => {
-      return templateData.every((templateItem: any) => {
-        return templateItem.orderName !== '' && templateItem.mainName !== '' && templateItem.option !== '';
+      return templateData.some((templateItem: any) => {
+        return templateItem.orderName === '' || templateItem.mainName === '' || templateItem.option === '';
       });
     };
 
@@ -116,7 +115,7 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {templateData.map((row) => (
+            {templateData.map((row: TemplateData) => (
               <TableRow key={row.id}>
                 <TableCell className="font-semibold">
                   <Select onValueChange={(value) => handleChange(row.id, 'option', value)}>
@@ -172,4 +171,4 @@ const SavePDFTemplate = ({ tabVariantType }: any) => {
   );
 };
 
-export default SavePDFTemplate;
+export default SaveSingleTemplate;

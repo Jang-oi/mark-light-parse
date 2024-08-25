@@ -6,7 +6,7 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const { autoUpdater } = require('electron-updater');
 
-const { paramFilePath, scriptPath, configFilePath } = paths;
+const { illustratorParamPath, illustratorScriptPath, photoshopParamPath, photoshopScriptPath, configFilePath } = paths;
 const createResponse = (success, message = '', data = {}) => ({
   success,
   message,
@@ -22,18 +22,31 @@ export function setupIpcHandlers() {
     }
   });
 
-  // IPC 통신 설정
   ipcMain.handle('savePDF', async (event, templateData, pathData) => {
     try {
       const { illustratorInstallPath } = pathData;
-      fs.writeFileSync(paramFilePath, JSON.stringify(templateData));
+      fs.writeFileSync(illustratorParamPath, JSON.stringify(templateData));
 
-      const extendScriptCommand = `"${illustratorInstallPath}" -r ${scriptPath}`;
+      const extendScriptCommand = `"${illustratorInstallPath}" -r ${illustratorScriptPath}`;
       await execPromise(extendScriptCommand);
 
       return createResponse(true, 'PDF 저장 완료');
     } catch (error) {
       return createResponse(false, `PDF 저장 중 오류 발생: ${error.message}`);
+    }
+  });
+
+  ipcMain.handle('saveTIFF', async (event, pdfFileData, pathData) => {
+    try {
+      const { photoshopInstallPath } = pathData;
+      fs.writeFileSync(photoshopParamPath, JSON.stringify(pdfFileData));
+
+      const extendScriptCommand = `"${photoshopInstallPath}" -r ${photoshopScriptPath}`;
+      await execPromise(extendScriptCommand);
+
+      return createResponse(true, 'TIFF 저장 완료');
+    } catch (error) {
+      return createResponse(false, `TIFF 저장 중 오류 발생: ${error.message}`);
     }
   });
 

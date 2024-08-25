@@ -7,15 +7,19 @@ import AutoUpdatePage from '@/pages/AutoUpdate/AutoUpdate.tsx';
 const sidebarNavItems = [
   {
     title: '초기 설정',
-    href: '/',
+    href: '/', // 초기 설정 페이지로의 링크
   },
   {
-    title: '소량 작업용',
-    href: '/savePDF',
+    title: 'PDF 저장 (소량)',
+    href: '/pdf/save-single', // 소량 PDF 저장 페이지로의 링크
   },
   {
-    title: '대량 작업용',
-    href: '/excelUpload',
+    title: 'PDF 저장 (대량)',
+    href: '/pdf/save-bulk', // 대량 PDF 저장 페이지로의 링크
+  },
+  {
+    title: 'TIFF 저장',
+    href: '/tiff/save', // TIFF 저장 페이지로의 링크
   },
 ];
 

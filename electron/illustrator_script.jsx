@@ -99,14 +99,14 @@ function parseJSON(jsonStr) {
 }
 
 function getFilePath(filePath, fileName) {
-  return filePath.replace(/auto_layer_script\.jsx$/, fileName);
+  return filePath.replace(/illustrator_script\.jsx$/, fileName);
 }
 
 if (doc) {
   var filePath = $.fileName;
-  var paramFilePath = getFilePath(filePath, 'params.json');
+  var illustratorParamPath = getFilePath(filePath, 'illustratorParams.json');
   var configFilePath = getFilePath(filePath, 'userConfig.json');
-  var paramFile = new File(paramFilePath);
+  var paramFile = new File(illustratorParamPath);
 
   paramFile.open('r');
   var paramData = paramFile.read();
@@ -120,18 +120,6 @@ if (doc) {
   if (params[0].variantType === '2') variantTypeNumber = 420;
 
   var pdfName = '';
-  if (!params[0].no) {
-    var now = new Date();
-    var year = now.getFullYear();
-    var month = ('0' + (now.getMonth() + 1)).slice(-2);
-    var day = ('0' + now.getDate()).slice(-2);
-    var hours = ('0' + now.getHours()).slice(-2);
-    var minutes = ('0' + now.getMinutes()).slice(-2);
-    var seconds = ('0' + now.getSeconds()).slice(-2);
-
-    pdfName = year + '' + month + '' + day + ' ' + hours + '' + minutes + '' + seconds;
-  }
-
   var resultLayer = findLayerByName('결과물');
   // 각 항목 처리
   for (var i = 0; i < params.length; i++) {
@@ -159,5 +147,17 @@ if (doc) {
   configFile.close();
 
   var config = parseJSON(configData);
+
+  if (!params[0].no) {
+    var now = new Date();
+    var year = now.getFullYear();
+    var month = ('0' + (now.getMonth() + 1)).slice(-2);
+    var day = ('0' + now.getDate()).slice(-2);
+    var hours = ('0' + now.getHours()).slice(-2);
+    var minutes = ('0' + now.getMinutes()).slice(-2);
+    var seconds = ('0' + now.getSeconds()).slice(-2);
+
+    pdfName = year + '' + month + '' + day + ' ' + hours + '' + minutes + '' + seconds;
+  }
   savePDFCallBack(config.pdfSavePath + pdfName);
 }

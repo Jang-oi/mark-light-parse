@@ -12,8 +12,10 @@ const currentPaths = isDev ? basePaths.dev : basePaths.prod;
 
 export const paths = {
   currentPaths,
-  scriptPath: path.join(currentPaths, 'auto_layer_script.jsx'),
-  paramFilePath: path.join(currentPaths, 'params.json'),
+  illustratorScriptPath: path.join(currentPaths, 'illustrator_script.jsx'),
+  photoshopScriptPath: path.join(currentPaths, 'photoshop_script.jsx'),
+  illustratorParamPath: path.join(currentPaths, 'illustratorParams.json'),
+  photoshopParamPath: path.join(currentPaths, 'photoshopParams.json'),
   runPath: isDev
     ? 'http://localhost:3000'
     : `file://${path.join(__dirname, 'resources', 'app', 'build', 'index.html')}`,

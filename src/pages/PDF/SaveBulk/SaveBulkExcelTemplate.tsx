@@ -10,8 +10,9 @@ import * as XLSX from 'xlsx';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
 import { useHandleAsyncTask } from '@/utils/handleAsyncTask.ts';
 import { ExcelTemplateData } from '@/types/templateTypes.ts';
+import { validateFiles } from '@/utils/fileUtil.ts';
 
-const ExcelUploadTemplate = ({ tabVariantType }: any) => {
+const SaveBulkExcelTemplate = ({ tabVariantType }: any) => {
   const INIT_TYPE = {
     MAX_TEMPLATES: tabVariantType === 'basic' ? 5 : 2,
     INIT_VARIANT_TYPE: tabVariantType === 'basic' ? '1' : '2',
@@ -19,7 +20,7 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
   };
   const { INIT_VARIANT_TYPE, VARIANT_TYPE_TEXT, MAX_TEMPLATES } = INIT_TYPE;
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<any>(null);
   const { configData } = useConfigStore();
   const handleAsyncTask = useHandleAsyncTask();
   const [excelFilteredData, setExcelFilteredData] = useState<ExcelTemplateData[]>([]);
@@ -28,85 +29,90 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
 
   const handleDrop = async (e: any) => {
     const acceptedFiles = e.target.files;
-    if (acceptedFiles.length > 0) {
-      const file = acceptedFiles[0];
-      if (file.type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-        toast({
-          variant: 'destructive',
-          title: 'Excel File 을 업로드 해주세요.',
-          description: '정상 적인 Excel 파일이 아닙니다.',
-        });
-        if (fileInputRef.current) fileInputRef.current.value = '';
-        return;
-      }
+    const { valid, message } = validateFiles(
+      acceptedFiles,
+      1,
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
 
-      const reader = new FileReader();
-      reader.onload = async (e: any) => {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array', bookVBA: true });
-
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(sheet);
-
-        // 리워드가 _01~_07 템플릿인지
-        const templateFilteredData = jsonData.filter((item: any) =>
-          excelFilterArray.some((filter) => item['리워드'].includes(filter)),
-        );
-
-        // 베이직, 대용량 구분
-        const variantTypeFilteredData = templateFilteredData.filter((item: any) =>
-          item['리워드'].includes(VARIANT_TYPE_TEXT),
-        );
-
-        // 옵션조건에서 공백 제거 후 길이를 계산하여 4글자 이하인 경우만
-        const characterCountFilteredData = variantTypeFilteredData.filter((item: any) => {
-          const cleanedOption = item['옵션조건'].replace(/\s+/g, ''); // 모든 공백 제거
-          return cleanedOption.length <= 4;
-        });
-
-        // 수량이 1개인 경우만
-        const countFilteredData = characterCountFilteredData.filter((item: any) => item['수량'] === 1);
-
-        // 데이터 변형
-        const resultData = countFilteredData.map((item: any, rowIndex: number) => {
-          const match = item['리워드'].match(numberPattern);
-          // 정규 표현식 매칭이 없는 경우, 빈 값을 반환하여 오류를 방지합니다.
-          const option = match ? `${parseInt(match[1], 10)}` : '0';
-          const variantType = INIT_VARIANT_TYPE;
-          const mainName = item['옵션조건'].replace(/\s+/g, ''); // 공백 제거
-          const characterCount = mainName.length.toString();
-
-          let commonNameValue = `${variantType}${option}${characterCount}`;
-          if (option !== '2') commonNameValue = `${variantType}${option}3`;
-
-          return {
-            id: rowIndex,
-            no: item['No.'],
-            template: item['리워드'],
-            option,
-            orderName: item['받는사람 성명'],
-            mainName,
-            fundingNumber: item['펀딩번호'],
-            characterCount,
-            variantType,
-            layerName: commonNameValue,
-            _orderName: `N${commonNameValue}`,
-            _mainName: commonNameValue,
-          };
-        });
-
-        setExcelFilteredData(resultData);
-        toast({ title: 'Excel Upload 완료' });
-      };
-
-      reader.readAsArrayBuffer(file);
+    if (!valid) {
+      toast({
+        variant: 'destructive',
+        title: '파일 업로드 오류',
+        description: message,
+      });
+      fileInputRef.current.value = '';
+      setExcelFilteredData([]);
+      return;
     }
+
+    const file = acceptedFiles[0];
+    const reader = new FileReader();
+    reader.onload = async (e: any) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array', bookVBA: true });
+
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+      // 리워드가 _01~_07 템플릿인지
+      const templateFilteredData = jsonData.filter((item: any) =>
+        excelFilterArray.some((filter) => item['리워드'].includes(filter)),
+      );
+
+      // 베이직, 대용량 구분
+      const variantTypeFilteredData = templateFilteredData.filter((item: any) =>
+        item['리워드'].includes(VARIANT_TYPE_TEXT),
+      );
+
+      // 옵션조건에서 공백 제거 후 길이를 계산하여 4글자 이하인 경우만
+      const characterCountFilteredData = variantTypeFilteredData.filter((item: any) => {
+        const cleanedOption = item['옵션조건'].replace(/\s+/g, ''); // 모든 공백 제거
+        return cleanedOption.length <= 4;
+      });
+
+      // 수량이 1개인 경우만
+      const countFilteredData = characterCountFilteredData.filter((item: any) => item['수량'] === 1);
+
+      // 데이터 변형
+      const resultData = countFilteredData.map((item: any, rowIndex: number) => {
+        const match = item['리워드'].match(numberPattern);
+        // 정규 표현식 매칭이 없는 경우, 빈 값을 반환하여 오류를 방지합니다.
+        const option = match ? `${parseInt(match[1], 10)}` : '0';
+        const variantType = INIT_VARIANT_TYPE;
+        const mainName = item['옵션조건'].replace(/\s+/g, ''); // 공백 제거
+        const characterCount = mainName.length.toString();
+
+        let commonNameValue = `${variantType}${option}${characterCount}`;
+        if (option !== '2') commonNameValue = `${variantType}${option}3`;
+
+        return {
+          id: rowIndex,
+          no: item['No.'],
+          template: item['리워드'],
+          option,
+          orderName: item['받는사람 성명'],
+          mainName,
+          fundingNumber: item['펀딩번호'],
+          characterCount,
+          variantType,
+          layerName: commonNameValue,
+          _orderName: `N${commonNameValue}`,
+          _mainName: commonNameValue,
+        };
+      });
+
+      setExcelFilteredData(resultData);
+      toast({ title: 'Excel Upload 완료' });
+    };
+
+    reader.readAsArrayBuffer(file);
   };
 
   const handleSavePDFExcel = async () => {
     await handleAsyncTask({
-      validationFunc: () => excelFilteredData.length > 0,
+      validationFunc: () => excelFilteredData.length < 0,
       validationMessage: 'Excel 파일이 정상적으로 업로드되어야 합니다.',
       apiFunc: async () => {
         for (let i = 0; i < excelFilteredData.length; i += MAX_TEMPLATES) {
@@ -140,7 +146,7 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {excelFilteredData.map((filteredItem: any) => (
+            {excelFilteredData.map((filteredItem: ExcelTemplateData) => (
               <TableRow key={filteredItem.id}>
                 <TableCell>{filteredItem.no}</TableCell>
                 <TableCell>{filteredItem.template}</TableCell>
@@ -162,4 +168,4 @@ const ExcelUploadTemplate = ({ tabVariantType }: any) => {
   );
 };
 
-export default ExcelUploadTemplate;
+export default SaveBulkExcelTemplate;

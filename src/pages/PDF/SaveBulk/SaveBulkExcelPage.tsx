@@ -1,7 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
-import SavePDFTemplate from '@/pages/SavePDF/components/SavePDFTemplate.tsx';
+import SaveBulkExcelTemplate from '@/pages/PDF/SaveBulk/SaveBulkExcelTemplate.tsx';
 
-export default function SavePDFPage() {
+const SaveBulkExcelPage = () => {
   return (
     <>
       <Tabs defaultValue="basic" className="w-full">
@@ -10,12 +10,14 @@ export default function SavePDFPage() {
           <TabsTrigger value="extra">대용량</TabsTrigger>
         </TabsList>
         <TabsContent value="basic">
-          <SavePDFTemplate tabVariantType="basic" />
+          <SaveBulkExcelTemplate tabVariantType="basic" />
         </TabsContent>
         <TabsContent value="extra">
-          <SavePDFTemplate tabVariantType="extra" />
+          <SaveBulkExcelTemplate tabVariantType="extra" />
         </TabsContent>
       </Tabs>
     </>
   );
-}
+};
+
+export default SaveBulkExcelPage;

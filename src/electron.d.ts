@@ -6,6 +6,7 @@ interface Response {
 interface Electron {
   savePath: (param: Record<string, any>) => Promise<Response>;
   savePDF: (param: Record<string, any>) => Promise<Response>;
+  saveTIFF: (param: Record<string, any>) => Promise<Response>;
   getConfig: () => Promise<Response>;
 }
 
