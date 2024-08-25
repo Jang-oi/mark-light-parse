@@ -1,6 +1,6 @@
 import create from 'zustand';
 
-const INIT_CONFIG_DATA = { illustratorInstallPath: '', photoshopInstallPath: '', pdfSavePath: '' };
+const INIT_CONFIG_DATA = { illustratorInstallPath: '', photoshopInstallPath: '', pdfSavePath: '', tiffSavePath: '' };
 // 상태 인터페이스 정의
 interface ConfigState {
   configData: typeof INIT_CONFIG_DATA;

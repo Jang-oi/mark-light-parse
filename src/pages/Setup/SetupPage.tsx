@@ -40,6 +40,12 @@ export default function SetupPage() {
             value={configData.pdfSavePath}
             onChange={handlePathChange}
           />
+          <InputField
+            label="PDF 저장 경로"
+            id="tiffSavePath"
+            value={configData.tiffSavePath}
+            onChange={handlePathChange}
+          />
           <CardFooter className="justify-center">
             <Button className="w-full" onClick={handleSavePath}>
               경로 저장

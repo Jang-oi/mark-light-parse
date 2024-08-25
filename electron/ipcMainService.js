@@ -27,7 +27,7 @@ export function setupIpcHandlers() {
       const { illustratorInstallPath } = pathData;
       fs.writeFileSync(illustratorParamPath, JSON.stringify(templateData));
 
-      const extendScriptCommand = `"${illustratorInstallPath}" -r ${illustratorScriptPath}`;
+      const extendScriptCommand = `"${illustratorInstallPath}" -r "${illustratorScriptPath}"`;
       await execPromise(extendScriptCommand);
 
       return createResponse(true, 'PDF 저장 완료');
