@@ -70,3 +70,4 @@ for (var i = 0; i < params.length; i++) {
   saveAsTIFF(config.tiffSavePath + params[i].name);
   app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
 }
+executeAction(app.charIDToTypeID('quit'));
