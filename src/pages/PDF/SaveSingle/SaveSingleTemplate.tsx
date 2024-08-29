@@ -18,6 +18,9 @@ import { useConfigStore } from '@/store/configStore.ts';
 import { toast } from '@/components/ui/use-toast.ts';
 import { useHandleAsyncTask } from '@/utils/handleAsyncTask.ts';
 import { TemplateData } from '@/types/templateTypes.ts';
+import { Label } from '@/components/ui/label.tsx';
+import { Switch } from '@/components/ui/switch.tsx';
+import { getDateFormat } from '@/utils/helper.ts';
 
 const SaveSingleTemplate = ({ tabVariantType }: any) => {
   const INIT_TYPE = {
@@ -38,8 +41,10 @@ const SaveSingleTemplate = ({ tabVariantType }: any) => {
     layerName: '',
     _orderName: '',
     _mainName: '',
+    pdfName: '',
   };
   const [templateData, setTemplateData] = useState<TemplateData[]>([INIT_TEMPLATE_DATA]);
+  const [checked, setChecked] = useState(true);
   const handleAsyncTask = useHandleAsyncTask();
   const { configData } = useConfigStore();
   const handleAddTemplate = () => {
@@ -55,6 +60,10 @@ const SaveSingleTemplate = ({ tabVariantType }: any) => {
 
   const handleDeleteRow = (id: number) => {
     setTemplateData((prevData) => prevData.filter((row) => row.id !== id));
+  };
+
+  const handleSwitchValue = (checked: boolean) => {
+    setChecked(checked);
   };
 
   const handleChange = (id: number, field: keyof TemplateData, value: string) => {
@@ -87,18 +96,33 @@ const SaveSingleTemplate = ({ tabVariantType }: any) => {
   };
 
   const handleSavePDF = async () => {
-    const isValidTemplateData = (templateData: any) => {
-      return templateData.some((templateItem: any) => {
+    const updatedTemplateData = templateData.map((item: any) => ({ ...item, pdfName: getDateFormat() }));
+
+    const isValidTemplateData = (data: any) => {
+      return data.some((templateItem: any) => {
         return templateItem.orderName === '' || templateItem.mainName === '' || templateItem.option === '';
       });
     };
 
-    await handleAsyncTask({
-      validationFunc: () => isValidTemplateData(templateData),
-      validationMessage: '템플릿, 수령자, 인쇄문구은 필수 입니다.',
-      apiFunc: () => window.electron.savePDF({ templateData, pathData: configData }),
-      alertOptions: {},
-    });
+    if (checked) {
+      await handleAsyncTask({
+        validationFunc: () => isValidTemplateData(updatedTemplateData),
+        validationMessage: '템플릿, 수령자, 인쇄문구은 필수 입니다.',
+        alertOptions: {},
+        apiFunc: async () => {
+          if (checked) {
+            const response = await window.electron.savePDFAndTIFF({
+              templateData: updatedTemplateData,
+              pathData: configData,
+            });
+            if (response.success) await window.electron.openFolder(configData.tiffSavePath);
+            return response;
+          } else {
+            return window.electron.savePDF({ templateData: updatedTemplateData, pathData: configData });
+          }
+        },
+      });
+    }
   };
 
   return (
@@ -162,7 +186,13 @@ const SaveSingleTemplate = ({ tabVariantType }: any) => {
           Add Template
         </Button>
       </CardFooter>
-      <CardFooter className="justify-center">
+      <CardFooter>
+        <div className="flex items-center w-80">
+          <Switch checked={checked} onCheckedChange={handleSwitchValue} />
+          <Label htmlFor="airplane-mode" className="m-4">
+            TIFF 자동 저장
+          </Label>
+        </div>
         <Button className="m-4 w-full" onClick={handleSavePDF}>
           PDF 저장
         </Button>

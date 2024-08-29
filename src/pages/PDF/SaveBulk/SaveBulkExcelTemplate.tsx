@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card.tsx';
+import { Card, CardContent, CardFooter } from '@/components/ui/card.tsx';
 import { excelFilterArray } from '@/utils/constant.ts';
 import { Input } from '@/components/ui/input.tsx';
 import { Label } from '@/components/ui/label.tsx';
@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useHandleAsyncTask } from '@/utils/handleAsyncTask.ts';
 import { ExcelTemplateData } from '@/types/templateTypes.ts';
 import { validateFiles } from '@/utils/fileUtil.ts';
+import { Switch } from '@/components/ui/switch.tsx';
 
 const SaveBulkExcelTemplate = ({ tabVariantType }: any) => {
   const INIT_TYPE = {
@@ -24,9 +25,12 @@ const SaveBulkExcelTemplate = ({ tabVariantType }: any) => {
   const { configData } = useConfigStore();
   const handleAsyncTask = useHandleAsyncTask();
   const [excelFilteredData, setExcelFilteredData] = useState<ExcelTemplateData[]>([]);
+  const [checked, setChecked] = useState(true);
   // 숫자 추출을 위한 정규 표현식
   const numberPattern = /_(\d{2})/;
-
+  const handleSwitchValue = (checked: boolean) => {
+    setChecked(checked);
+  };
   const handleDrop = async (e: any) => {
     const acceptedFiles = e.target.files;
     const { valid, message } = validateFiles(
@@ -114,15 +118,22 @@ const SaveBulkExcelTemplate = ({ tabVariantType }: any) => {
     await handleAsyncTask({
       validationFunc: () => excelFilteredData.length < 0,
       validationMessage: 'Excel 파일이 정상적으로 업로드되어야 합니다.',
+      alertOptions: {},
       apiFunc: async () => {
+        let response;
         for (let i = 0; i < excelFilteredData.length; i += MAX_TEMPLATES) {
           const templateData = excelFilteredData.slice(i, i + MAX_TEMPLATES);
-          const response = await window.electron.savePDF({ templateData, pathData: configData });
-          if (!response.success) throw new Error(response.message);
+          const pdfName = templateData.map((item) => item.no).join('_');
+          templateData.forEach((item) => (item.pdfName = pdfName));
+          if (checked) {
+            response = await window.electron.savePDFAndTIFF({ templateData, pathData: configData });
+          } else {
+            response = await window.electron.savePDF({ templateData, pathData: configData });
+          }
         }
-        return { success: true, message: 'PDF 파일 저장이 완료되었습니다.', data: {} };
+        if (response?.success && checked) await window.electron.openFolder(configData.tiffSavePath);
+        return response;
       },
-      alertOptions: {},
     });
   };
 
@@ -132,9 +143,17 @@ const SaveBulkExcelTemplate = ({ tabVariantType }: any) => {
       <div className="grid gap-6 m-3">
         <Label htmlFor="excel">Excel Upload</Label>
         <Input id="excel" type="file" accept=".xlsx, .xls, .csv" ref={fileInputRef} onChange={handleDrop} />
-        <Button className="m-4" onClick={handleSavePDFExcel}>
-          PDF 저장
-        </Button>
+        <CardFooter>
+          <div className="flex items-center w-80">
+            <Switch checked={checked} onCheckedChange={handleSwitchValue} />
+            <Label htmlFor="airplane-mode" className="m-4">
+              TIFF 자동 저장
+            </Label>
+          </div>
+          <Button className="m-4 w-full" onClick={handleSavePDFExcel}>
+            PDF 저장
+          </Button>
+        </CardFooter>
         <Table>
           <TableHeader>
             <TableRow>

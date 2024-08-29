@@ -46,10 +46,10 @@ function saveAsTIFF(savePath) {
 }
 
 var filePath = $.fileName;
-var illustratorParamPath = getFilePath(filePath, 'photoshopParams.json');
+var photoshopParamPath = getFilePath(filePath, 'photoshopParams.json');
 var configFilePath = getFilePath(filePath, 'userConfig.json');
 // 파라미터 파일 읽기
-var paramFile = new File(illustratorParamPath);
+var paramFile = new File(photoshopParamPath);
 paramFile.open('r');
 var paramData = paramFile.read();
 paramFile.close();

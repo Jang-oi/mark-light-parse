@@ -7,7 +7,9 @@ interface Electron {
   savePath: (param: Record<string, any>) => Promise<Response>;
   savePDF: (param: Record<string, any>) => Promise<Response>;
   saveTIFF: (param: Record<string, any>) => Promise<Response>;
+  savePDFAndTIFF: (param: Record<string, any>) => Promise<Response>;
   getConfig: () => Promise<Response>;
+  openFolder: (path: string) => Promise<Response>;
 }
 
 interface IpcRenderer {

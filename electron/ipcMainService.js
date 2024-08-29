@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron';
+import { ipcMain, shell } from 'electron';
 import { execPromise, paths } from './common.js';
 import fs from 'fs';
 
@@ -24,11 +24,12 @@ export function setupIpcHandlers() {
 
   ipcMain.handle('savePDF', async (event, templateData, pathData) => {
     try {
-      const { illustratorInstallPath } = pathData;
+      const { illustratorInstallPath, pdfSavePath } = pathData;
       fs.writeFileSync(illustratorParamPath, JSON.stringify(templateData));
 
       const extendScriptCommand = `"${illustratorInstallPath}" -r "${illustratorScriptPath}"`;
       await execPromise(extendScriptCommand);
+      await shell.openPath(pdfSavePath);
 
       return createResponse(true, 'PDF 저장 완료');
     } catch (error) {
@@ -38,15 +39,44 @@ export function setupIpcHandlers() {
 
   ipcMain.handle('saveTIFF', async (event, pdfFileData, pathData) => {
     try {
-      const { photoshopInstallPath } = pathData;
+      const { photoshopInstallPath, tiffSavePath } = pathData;
       fs.writeFileSync(photoshopParamPath, JSON.stringify(pdfFileData));
 
       const extendScriptCommand = `"${photoshopInstallPath}" -r ${photoshopScriptPath}`;
       await execPromise(extendScriptCommand);
+      await shell.openPath(tiffSavePath);
 
       return createResponse(true, 'TIFF 저장 완료');
     } catch (error) {
       return createResponse(false, `TIFF 저장 중 오류 발생: ${error.message}`);
+    }
+  });
+
+  ipcMain.handle('savePDFAndTIFF', async (event, templateData, pathData) => {
+    try {
+      const { illustratorInstallPath, photoshopInstallPath, pdfSavePath } = pathData;
+      fs.writeFileSync(illustratorParamPath, JSON.stringify(templateData));
+
+      const illustratorExtendScriptCommand = `"${illustratorInstallPath}" -r "${illustratorScriptPath}"`;
+      await execPromise(illustratorExtendScriptCommand);
+
+      const pdfFileData = [
+        {
+          id: 0,
+          name: templateData[0].pdfName,
+          path: `${pdfSavePath}${templateData[0].pdfName}.pdf`,
+          type: 'application/pdf',
+        },
+      ];
+
+      fs.writeFileSync(photoshopParamPath, JSON.stringify(pdfFileData));
+
+      const photoshopExtendScriptCommand = `"${photoshopInstallPath}" -r ${photoshopScriptPath}`;
+      await execPromise(photoshopExtendScriptCommand);
+
+      return createResponse(true, 'PDF, TIFF 저장 완료');
+    } catch (error) {
+      return createResponse(false, `PDF, TIFF 저장 중 오류 발생: ${error.message}`);
     }
   });
 
@@ -61,6 +91,15 @@ export function setupIpcHandlers() {
       return createResponse(true, '', JSON.parse(data));
     } catch (error) {
       return createResponse(false, `경로 조회 중 오류 발생: ${error.message}`);
+    }
+  });
+
+  ipcMain.handle('openFolder', async (event, path) => {
+    try {
+      await shell.openPath(path);
+      return createResponse(true, '');
+    } catch (error) {
+      return createResponse(false, `폴더 오픈 중 오류 발생: ${error.message}`);
     }
   });
 }

@@ -9,6 +9,7 @@ export interface TemplateData {
   layerName: string;
   _orderName: string;
   _mainName: string;
+  pdfName: string;
 }
 
 export interface ExcelTemplateData {
@@ -24,4 +25,5 @@ export interface ExcelTemplateData {
   layerName: string;
   _orderName: string;
   _mainName: string;
+  pdfName?: string;
 }

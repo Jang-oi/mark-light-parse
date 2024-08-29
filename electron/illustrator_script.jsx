@@ -119,13 +119,10 @@ if (doc) {
   var variantTypeNumber = 210;
   if (params[0].variantType === '2') variantTypeNumber = 420;
 
-  var pdfName = '';
+  var pdfName = params[0].pdfName;
   var resultLayer = findLayerByName('결과물');
   // 각 항목 처리
   for (var i = 0; i < params.length; i++) {
-    var no = params[i].no;
-    if (no) pdfName += i + 1 === params.length ? no : no + '_';
-
     var processParam = {
       currentLayer: findLayerByName(params[i].layerName),
       yOffset: i * variantTypeNumber,
@@ -148,16 +145,5 @@ if (doc) {
 
   var config = parseJSON(configData);
 
-  if (!params[0].no) {
-    var now = new Date();
-    var year = now.getFullYear();
-    var month = ('0' + (now.getMonth() + 1)).slice(-2);
-    var day = ('0' + now.getDate()).slice(-2);
-    var hours = ('0' + now.getHours()).slice(-2);
-    var minutes = ('0' + now.getMinutes()).slice(-2);
-    var seconds = ('0' + now.getSeconds()).slice(-2);
-
-    pdfName = year + '' + month + '' + day + ' ' + hours + '' + minutes + '' + seconds;
-  }
   savePDFCallBack(config.pdfSavePath + pdfName);
 }
