@@ -1,14 +1,33 @@
-import { useLoadingStore } from '@/store/loadingStore.ts'; // import your store
+import { useLoadingStore } from '@/store/loadingStore.ts';
+import { Progress } from '@/components/ui/progress.tsx';
+import { useEffect } from 'react';
 
 const LoadingModal = () => {
-  const { isLoading } = useLoadingStore();
+  const { isLoading, progressOptions } = useLoadingStore();
+  const { useProgress, value, total, onComplete } = progressOptions;
+
+  useEffect(() => {
+    if (value === 100 || (total && value === total)) {
+      if (onComplete) onComplete();
+    }
+  }, [value, total, onComplete]);
+
   if (!isLoading) return null;
 
+  const progressValue = total ? (value / total) * 100 : value;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="flex flex-col items-center space-y-4">
-        <div className="animate-spin rounded-full border-4 border-gray-300 border-t-gray-900 h-12 w-12" />
-        <p className="text-white dark:text-gray-400">Loading...</p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-2xl text-center">
+        <div className="w-16 h-16 mx-auto border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <h2 className="text-2xl font-bold text-primary">잠시만 기다려주세요</h2>
+        {useProgress && (
+          <>
+            <Progress value={progressValue} className="w-full h-2" />
+            <p className="text-lg font-medium text-muted-foreground">
+              {total ? `${value}/${total}` : `${progressValue.toFixed(0)}%`}
+            </p>
+          </>
+        )}
       </div>
     </div>
   );

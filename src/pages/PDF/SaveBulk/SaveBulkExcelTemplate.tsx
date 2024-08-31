@@ -12,6 +12,7 @@ import { useHandleAsyncTask } from '@/utils/handleAsyncTask.ts';
 import { ExcelTemplateData } from '@/types/templateTypes.ts';
 import { validateFiles } from '@/utils/fileUtil.ts';
 import { Switch } from '@/components/ui/switch.tsx';
+import { useLoadingStore } from '@/store/loadingStore.ts';
 
 const SaveBulkExcelTemplate = ({ tabVariantType }: any) => {
   const INIT_TYPE = {
@@ -23,6 +24,7 @@ const SaveBulkExcelTemplate = ({ tabVariantType }: any) => {
 
   const fileInputRef = useRef<any>(null);
   const { configData } = useConfigStore();
+  const { startLoading, stopLoading } = useLoadingStore();
   const handleAsyncTask = useHandleAsyncTask();
   const [excelFilteredData, setExcelFilteredData] = useState<ExcelTemplateData[]>([]);
   const [checked, setChecked] = useState(true);
@@ -115,16 +117,26 @@ const SaveBulkExcelTemplate = ({ tabVariantType }: any) => {
   };
 
   const handleSavePDFExcel = async () => {
+    const excelFilteredDataLength = excelFilteredData.length;
+
     await handleAsyncTask({
-      validationFunc: () => excelFilteredData.length < 0,
+      validationFunc: () => excelFilteredDataLength < 0,
       validationMessage: 'Excel 파일이 정상적으로 업로드되어야 합니다.',
       alertOptions: {},
+      useLoading: false,
       apiFunc: async () => {
         let response;
-        for (let i = 0; i < excelFilteredData.length; i += MAX_TEMPLATES) {
+        let progressOptions = {
+          value: 0,
+          total: Math.ceil(excelFilteredDataLength / MAX_TEMPLATES),
+          useProgress: true,
+        };
+        for (let i = 0; i < excelFilteredDataLength; i += MAX_TEMPLATES) {
           const templateData = excelFilteredData.slice(i, i + MAX_TEMPLATES);
           const pdfName = templateData.map((item) => item.no).join('_');
           templateData.forEach((item) => (item.pdfName = pdfName));
+          progressOptions.value = Math.ceil(i / MAX_TEMPLATES);
+          startLoading(progressOptions);
           if (checked) {
             response = await window.electron.savePDFAndTIFF({ templateData, pathData: configData });
           } else {
@@ -132,6 +144,7 @@ const SaveBulkExcelTemplate = ({ tabVariantType }: any) => {
           }
         }
         if (response?.success && checked) await window.electron.openFolder(configData.tiffSavePath);
+        stopLoading();
         return response;
       },
     });
