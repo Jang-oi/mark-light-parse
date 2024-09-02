@@ -1,4 +1,4 @@
-import create from 'zustand';
+import { create } from 'zustand';
 
 const INIT_CONFIG_DATA = { illustratorInstallPath: '', photoshopInstallPath: '', pdfSavePath: '', tiffSavePath: '' };
 // 상태 인터페이스 정의

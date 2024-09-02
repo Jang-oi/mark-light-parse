@@ -5,22 +5,10 @@ import ModeToggle from '@/components/common/ModeToggle.tsx';
 import AutoUpdatePage from '@/pages/AutoUpdate/AutoUpdate.tsx';
 
 const sidebarNavItems = [
-  {
-    title: '초기 설정',
-    href: '/', // 초기 설정 페이지로의 링크
-  },
-  {
-    title: 'PDF 저장 (소량)',
-    href: '/pdf/save-single', // 소량 PDF 저장 페이지로의 링크
-  },
-  {
-    title: 'PDF 저장 (대량)',
-    href: '/pdf/save-bulk', // 대량 PDF 저장 페이지로의 링크
-  },
-  {
-    title: 'TIFF 저장',
-    href: '/tiff/save', // TIFF 저장 페이지로의 링크
-  },
+  { title: '초기 설정', href: '/' },
+  { title: 'PDF 저장 (소량)', href: '/pdf/save-single' },
+  { title: 'PDF 저장 (대량)', href: '/pdf/save-bulk' },
+  { title: 'TIFF 저장', href: '/tiff/save' },
 ];
 
 interface SettingsLayoutProps {
