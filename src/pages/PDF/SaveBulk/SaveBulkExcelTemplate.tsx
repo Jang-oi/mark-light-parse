@@ -95,7 +95,7 @@ const SaveBulkExcelTemplate = ({ tabVariantType }: any) => {
         return {
           id: rowIndex,
           no: item['관리번호'],
-          template: item['상품명'],
+          template: item['판매처 옵션'],
           option,
           orderName: item['수령자이름'],
           mainName,
@@ -235,7 +235,7 @@ const SaveBulkExcelTemplate = ({ tabVariantType }: any) => {
           <TableHeader>
             <TableRow>
               <TableHead>No</TableHead>
-              <TableHead className="w-[350px]">템플릿</TableHead>
+              <TableHead className="w-[450px]">템플릿</TableHead>
               <TableHead>수령자</TableHead>
               <TableHead>인쇄문구</TableHead>
               <TableHead>펀딩번호</TableHead>
