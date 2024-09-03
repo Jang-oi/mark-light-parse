@@ -73,7 +73,7 @@ function processLayer(processParam) {
     var fundingNumberTextFramesLength = fundingNumberTextFrames.length;
 
     for (var k = 0; k < fundingNumberTextFramesLength; k++) {
-      fundingNumberTextFrames[j].contents = fundingNumber;
+      fundingNumberTextFrames[k].contents = fundingNumber;
     }
   }
   // 레이어의 모든 객체를 타겟 레이어로 복사 및 Y축 좌표 조정
