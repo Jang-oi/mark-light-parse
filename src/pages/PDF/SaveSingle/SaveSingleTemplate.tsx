@@ -104,25 +104,23 @@ const SaveSingleTemplate = ({ tabVariantType }: any) => {
       });
     };
 
-    if (checked) {
-      await handleAsyncTask({
-        validationFunc: () => isValidTemplateData(updatedTemplateData),
-        validationMessage: '템플릿, 수령자, 인쇄문구은 필수 입니다.',
-        alertOptions: {},
-        apiFunc: async () => {
-          if (checked) {
-            const response = await window.electron.savePDFAndTIFF({
-              templateData: updatedTemplateData,
-              pathData: configData,
-            });
-            if (response.success) await window.electron.openFolder(configData.tiffSavePath);
-            return response;
-          } else {
-            return window.electron.savePDF({ templateData: updatedTemplateData, pathData: configData });
-          }
-        },
-      });
-    }
+    await handleAsyncTask({
+      validationFunc: () => isValidTemplateData(updatedTemplateData),
+      validationMessage: '템플릿, 수령자, 인쇄문구은 필수 입니다.',
+      alertOptions: {},
+      apiFunc: async () => {
+        if (checked) {
+          const response = await window.electron.savePDFAndTIFF({
+            templateData: updatedTemplateData,
+            pathData: configData,
+          });
+          if (response.success) await window.electron.openFolder(configData.tiffSavePath);
+          return response;
+        } else {
+          return window.electron.savePDF({ templateData: updatedTemplateData, pathData: configData });
+        }
+      },
+    });
   };
 
   return (
