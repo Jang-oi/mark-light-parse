@@ -46,6 +46,7 @@ function processLayer(processParam) {
   var currentLayer = processParam['currentLayer'];
   var orderName = processParam['orderName'];
   var mainName = processParam['mainName'];
+  var subName = processParam['subName'];
   var resultLayer = processParam['resultLayer'];
   var fundingNumber = processParam['fundingNumber'];
 
@@ -76,6 +77,17 @@ function processLayer(processParam) {
       fundingNumberTextFrames[k].contents = fundingNumber;
     }
   }
+
+  var subNames = findGroupByName(currentLayer, 'SubNames');
+  if (subNames) {
+    var subNamesTextFrames = subNames.textFrames;
+    var subNamesTextFramesLength = subNamesTextFrames.length;
+
+    for (var m = 0; m < subNamesTextFramesLength; m++) {
+      subNamesTextFrames[m].contents = subName;
+    }
+  }
+
   // 레이어의 모든 객체를 타겟 레이어로 복사 및 Y축 좌표 조정
   var objects = currentLayer.pageItems;
   var length = objects.length;
@@ -126,10 +138,9 @@ if (doc) {
     var processParam = {
       currentLayer: findLayerByName(params[i].layerName),
       yOffset: i * variantTypeNumber,
-      _orderName: params[i]._orderName,
       orderName: params[i].orderName,
-      _mainName: params[i]._mainName,
       mainName: params[i].mainName,
+      subName: params[i].subName,
       fundingNumber: params[i].fundingNumber,
       resultLayer: resultLayer,
     };

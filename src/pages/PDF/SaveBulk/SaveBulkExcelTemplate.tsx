@@ -53,7 +53,6 @@ const SaveBulkExcelTemplate = ({ tabVariantType }: any) => {
     }
 
     const ezAdminExcelUploadData = (jsonData: any) => {
-      // 리워드가 _01~_07 템플릿인지
       const templateFilteredData = jsonData.filter((item: any) => {
         if (!item['판매처 옵션']) return;
         if (!item['상품명'].includes('베이직') && !item['상품명'].includes('대용량')) return;

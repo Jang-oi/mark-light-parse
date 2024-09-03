@@ -24,11 +24,13 @@ export function useHandleAsyncTask() {
     useLoading?: boolean;
   }) => {
     if (validationFunc && validationFunc()) {
-      toast({
-        variant: 'destructive',
-        title: '유효성 검사 실패',
-        description: validationMessage || '입력 값을 확인해주세요.',
-      });
+      if (validationMessage) {
+        toast({
+          variant: 'destructive',
+          title: '유효성 검사 실패',
+          description: validationMessage || '입력 값을 확인해주세요.',
+        });
+      }
       return;
     }
 

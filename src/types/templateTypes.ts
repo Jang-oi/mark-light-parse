@@ -3,12 +3,12 @@ export interface TemplateData {
   option: string;
   orderName: string;
   mainName: string;
+  subName?: string;
   fundingNumber: string;
   characterCount: string;
   variantType: string;
+  _mainName?: string;
   layerName: string;
-  _orderName: string;
-  _mainName: string;
   pdfName: string;
 }
 

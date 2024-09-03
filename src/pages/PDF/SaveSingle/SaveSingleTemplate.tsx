@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CircleHelp } from 'lucide-react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card.tsx';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
 import {
@@ -21,6 +22,7 @@ import { TemplateData } from '@/types/templateTypes.ts';
 import { Label } from '@/components/ui/label.tsx';
 import { Switch } from '@/components/ui/switch.tsx';
 import { getDateFormat } from '@/utils/helper.ts';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip.tsx';
 
 const SaveSingleTemplate = ({ tabVariantType }: any) => {
   const INIT_TYPE = {
@@ -35,11 +37,11 @@ const SaveSingleTemplate = ({ tabVariantType }: any) => {
     option: '',
     orderName: '',
     mainName: '',
+    subName: '',
     characterCount: '3',
     fundingNumber: '',
     variantType: INIT_VARIANT_TYPE,
     layerName: '',
-    _orderName: '',
     _mainName: '',
     pdfName: '',
   };
@@ -70,24 +72,24 @@ const SaveSingleTemplate = ({ tabVariantType }: any) => {
     setTemplateData((prevData) =>
       prevData.map((row) => {
         if (row.id === id) {
-          let updatedRow = { ...row, [field]: value };
-          // 한글만 포함된 문자열 추출
-          if (field === 'orderName' || field === 'mainName') {
-            const koreanRegex = /[ㄱ-ㅎㅏ-ㅣ가-힣]/g;
-            const koreanOnly = value.match(koreanRegex)?.join('') || '';
+          const updatedRow = { ...row, [field]: value };
+          updatedRow['characterCount'] = updatedRow.mainName.length.toString();
+          let { variantType, option, characterCount } = updatedRow;
 
-            if (koreanOnly.length > 3) return row;
-            updatedRow[field] = koreanOnly;
-            updatedRow['characterCount'] = updatedRow.mainName.length.toString();
+          let layerName;
+          if (option === '2') {
+            // 2 템플릿
+            layerName = `${variantType}${option}${characterCount}`;
+          } else if (Number(option) < 8) {
+            // 1, 3~7 템플릿
+            characterCount = Number(characterCount) < 4 ? '3' : '4';
+            layerName = `${variantType}${option}${characterCount}`;
+          } else {
+            // 8~9 템플릿
+            layerName = `${variantType}${option}9`;
           }
-          const { variantType, option, characterCount } = updatedRow;
-          let commonNameValue = `${variantType}${option}${characterCount}`;
-          if (option !== '2') commonNameValue = `${variantType}${option}3`;
 
-          updatedRow['layerName'] = commonNameValue;
-          updatedRow['_orderName'] = `N${commonNameValue}`;
-          updatedRow['_mainName'] = commonNameValue;
-
+          updatedRow['layerName'] = layerName;
           return updatedRow;
         }
         return row;
@@ -96,17 +98,65 @@ const SaveSingleTemplate = ({ tabVariantType }: any) => {
   };
 
   const handleSavePDF = async () => {
-    const updatedTemplateData = templateData.map((item: any) => ({ ...item, pdfName: getDateFormat() }));
+    // const updatedTemplateData = templateData.map((item: any) => ({ ...item, pdfName: getDateFormat() }));
+    const updatedTemplateData = templateData.map((item: any) => {
+      // 9 템플릿은 subName 존재
+      if (item.option === '9') {
+        const parts = item.mainName.split('/');
+        item['_mainName'] = parts[0];
+        item['subName'] = parts[1];
+      }
+      return { ...item, pdfName: getDateFormat() };
+    });
 
     const isValidTemplateData = (data: any) => {
       return data.some((templateItem: any) => {
-        return templateItem.orderName === '' || templateItem.mainName === '' || templateItem.option === '';
+        const { orderName, mainName, subName = '', option, _mainName = '' } = templateItem;
+        const optionNumber = Number(option);
+        // 기본적인 빈 값 검증
+        if (!orderName || !mainName || !option) {
+          toast({ title: '템플릿, 수령자, 인쇄문구는 필수입니다.', variant: 'destructive' });
+          return true; // 필수 값이 누락된 경우
+        }
+
+        const mainNameLength = mainName.length;
+        const _mainNameLength = _mainName.length;
+        const subNameLength = subName.length;
+
+        // option에 따른 조건 검증
+        if (optionNumber >= 1 && optionNumber <= 7 && mainNameLength > 4) {
+          toast({ title: '01~07 템플릿은 인쇄문구가 4글자 이하여야합니다.', variant: 'destructive' });
+          return true; // option 1~7이면 mainName이 4글자 이하이어야 함
+        }
+
+        if (optionNumber === 8) {
+          // 영어 대소문자, 공백, 쉼표, 마침표, 백틱만 허용
+          const isEnglishOnly = /^[a-zA-Z ,.`]+$/.test(mainName);
+          if (!isEnglishOnly || mainNameLength > 11) {
+            toast({ title: '08 템플릿은 인쇄문구가 영문 11글자 이하여야합니다.', variant: 'destructive' });
+            return true; // option 8이면 mainName이 영문 11글자 이하이어야 함
+          }
+        }
+
+        if (optionNumber === 9) {
+          if (_mainNameLength > 22 || subNameLength < 1 || subNameLength > 4) {
+            toast({
+              title: '09 템플릿은 인쇄문구가 22글자 이하여야하고 / 의 뒷 문자가 4글자 이하여야합니다.',
+              variant: 'destructive',
+            });
+            return true; // option 9이면 mainName이 22글자 이하, subName이 4글자 이하이어야 함
+          } else {
+            templateItem['mainName'] = _mainName;
+          }
+        }
+        // 수령자는 앞에서 4글자를 짤라서 저장해야함
+        templateItem['orderName'] = orderName.slice(0, 4);
+        return false; // 모든 조건을 만족하면 false
       });
     };
 
     await handleAsyncTask({
       validationFunc: () => isValidTemplateData(updatedTemplateData),
-      validationMessage: '템플릿, 수령자, 인쇄문구은 필수 입니다.',
       alertOptions: {},
       apiFunc: async () => {
         if (checked) {
@@ -131,7 +181,26 @@ const SaveSingleTemplate = ({ tabVariantType }: any) => {
             <TableRow>
               <TableHead>템플릿</TableHead>
               <TableHead>수령자</TableHead>
-              <TableHead>인쇄문구</TableHead>
+              <TableHead>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="link">
+                        인쇄문구
+                        <CircleHelp className="m-1" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <div className="space-y-1">
+                        <h4 className="text-lg font-bold">인쇄문구 TIP</h4>
+                        <p className="text-sm">Template 1~7 - 4글자 이하 입력</p>
+                        <p className="text-sm">Template 8 - 영문 11글자 이하 입력</p>
+                        <p className="text-sm">Template 9 - 22글자 이하 입력 /(슬래쉬) 를 기준으로 두 번째 이름 지정</p>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </TableHead>
               <TableHead>송장번호</TableHead>
               <TableHead>삭제</TableHead>
             </TableRow>
@@ -159,10 +228,10 @@ const SaveSingleTemplate = ({ tabVariantType }: any) => {
                 <TableCell>
                   <Input value={row.orderName} onChange={(e) => handleChange(row.id, 'orderName', e.target.value)} />
                 </TableCell>
-                <TableCell>
+                <TableCell className="w-[300px]">
                   <Input value={row.mainName} onChange={(e) => handleChange(row.id, 'mainName', e.target.value)} />
                 </TableCell>
-                <TableCell>
+                <TableCell className="w-[180px]">
                   <Input
                     value={row.fundingNumber}
                     onChange={(e) => handleChange(row.id, 'fundingNumber', e.target.value)}
