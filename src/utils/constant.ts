@@ -6,6 +6,8 @@ export const TEMPLATES = [
   { id: 5, option: '5', name: '네임스티커_05하트' },
   { id: 6, option: '6', name: '네임스티커_06스타' },
   { id: 7, option: '7', name: '네임스티커_07심플한글네임' },
+  { id: 8, option: '8', name: '네임스티커_08심플영문네임' },
+  { id: 9, option: '9', name: '네임스티커_09심플학교' },
 ];
 
 export const excelFilterArray = [
@@ -16,4 +18,6 @@ export const excelFilterArray = [
   '_05하트',
   '_06스타',
   '_07심플한글네임',
+  '_08심플영문네임',
+  '_09심플학교',
 ];

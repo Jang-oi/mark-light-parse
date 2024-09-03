@@ -238,7 +238,7 @@ const SaveBulkExcelTemplate = ({ tabVariantType }: any) => {
               <TableHead className="w-[450px]">템플릿</TableHead>
               <TableHead>수령자</TableHead>
               <TableHead>인쇄문구</TableHead>
-              <TableHead>펀딩번호</TableHead>
+              <TableHead>송장번호</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
