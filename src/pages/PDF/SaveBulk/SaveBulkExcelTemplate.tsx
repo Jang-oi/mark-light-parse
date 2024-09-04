@@ -14,13 +14,14 @@ import { validateFiles } from '@/utils/fileUtil.ts';
 import { Switch } from '@/components/ui/switch.tsx';
 import { useLoadingStore } from '@/store/loadingStore.ts';
 
-const SaveBulkExcelTemplate = ({ tabVariantType }: any) => {
-  const INIT_TYPE = {
-    MAX_TEMPLATES: tabVariantType === 'basic' ? 5 : 2,
-    INIT_VARIANT_TYPE: tabVariantType === 'basic' ? '1' : '2',
-    VARIANT_TYPE_TEXT: tabVariantType === 'basic' ? '베이직' : '대용량',
+const SaveBulkExcelTemplate = () => {
+  const getVariantType = (variantValue: string) => {
+    return {
+      MAX_TEMPLATES: variantValue === '베이직' ? 5 : 2,
+      INIT_VARIANT_TYPE: variantValue === '베이직' ? '1' : '2',
+      VARIANT_TYPE_TEXT: variantValue === '베이직' ? '베이직' : '대용량',
+    };
   };
-  const { INIT_VARIANT_TYPE, VARIANT_TYPE_TEXT, MAX_TEMPLATES } = INIT_TYPE;
 
   const fileInputRef = useRef<any>(null);
   const { configData } = useConfigStore();
@@ -53,73 +54,75 @@ const SaveBulkExcelTemplate = ({ tabVariantType }: any) => {
     }
 
     const ezAdminExcelUploadData = (jsonData: any) => {
-      const templateFilteredData = jsonData.filter((item: any) => {
+      return jsonData.filter((item: any, rowIndex: number) => {
         if (!item['판매처 옵션']) return;
         if (!item['상품명'].includes('베이직') && !item['상품명'].includes('대용량')) return;
 
+        let isMainNaim = false;
         const [mainNamePart, variantPart, templatePart] = item['판매처 옵션'].split(' / ');
         const mainName = mainNamePart.split(': ')[1];
         const variant = variantPart.split(': ')[1];
         const template = templatePart.split(': ')[1];
 
-        // 베이직, 대용량 구분
-        const isVariant = variant.includes(VARIANT_TYPE_TEXT);
-
-        // 이름에서 공백 제거 후 길이를 계산하여 4글자 이하인 경우만
-        const cleanedOption = mainName.replace(/\s+/g, '');
-        const isMainNaim = cleanedOption.length <= 4;
-
-        // 01~07 템플릿인지 확인
+        // 01~09 템플릿인지 확인
         const templateNumber = parseInt(template.substring(0, 2), 10);
-        const isTemplate = templateNumber >= 1 && templateNumber <= 7;
+        const isTemplate = templateNumber >= 1 && templateNumber <= 8;
+
+        // 1 ~ 7 템플릿은 이름에서 공백 제거 후 길이를 계산하여 4글자 이하인 경우만
+        if (templateNumber <= 7) {
+          const cleanedOption = mainName.replace(/\s+/g, '');
+          isMainNaim = cleanedOption.length <= 4;
+        } else if (templateNumber === 8) {
+          // 영어 대소문자, 공백, 쉼표, 마침표, 백틱만 허용
+          const isEnglishOnly = /^[a-zA-Z ,.`]+$/.test(mainName);
+          if (isEnglishOnly && mainName.length <= 11) isMainNaim = true;
+        } else if (templateNumber === 9) {
+          // mainName이 22글자 이하, subName이 4글자 이하이어야 함
+          // 엑셀에서 subName 난감해서 못하는 중
+        }
 
         const isItemCount = item['주문수량'] === 1;
 
-        return isVariant && isMainNaim && isTemplate && isItemCount;
-      });
+        if (isMainNaim && isTemplate && isItemCount) {
+          const { INIT_VARIANT_TYPE } = getVariantType(variant);
+          let characterCount = mainName.length.toString();
 
-      // 데이터 변형
-      return templateFilteredData.map((item: any, rowIndex: number) => {
-        const [mainNamePart, _variantPart, templatePart] = item['판매처 옵션'].split(' / ');
-        const mainName = mainNamePart.split(': ')[1].replace(/\s+/g, '');
-        const template = templatePart.split(': ')[1];
+          let layerName;
+          if (templateNumber === 2) {
+            // 2 템플릿
+            layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
+          } else if (templateNumber < 8) {
+            // 1, 3~7 템플릿
+            characterCount = Number(characterCount) < 4 ? '3' : '4';
+            layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
+          } else {
+            // 8~9 템플릿
+            layerName = `${INIT_VARIANT_TYPE}${templateNumber}9`;
+          }
 
-        const option = `${parseInt(template.substring(0, 2), 10)}`;
-        const variantType = INIT_VARIANT_TYPE;
-        const characterCount = mainName.length.toString();
+          item.id = rowIndex;
+          item.no = item['관리번호'];
+          item.template = item['판매처 옵션'];
+          item.option = `${templateNumber}`;
+          item.orderName = item['수령자이름'];
+          item.mainName = mainName;
+          item.fundingNumber = item['송장번호'];
+          item.characterCount = characterCount;
+          item.variantType = INIT_VARIANT_TYPE;
+          item.layerName = layerName;
 
-        let commonNameValue = `${variantType}${option}${characterCount}`;
-        if (option !== '2') commonNameValue = `${variantType}${option}3`;
-
-        return {
-          id: rowIndex,
-          no: item['관리번호'],
-          template: item['판매처 옵션'],
-          option,
-          orderName: item['수령자이름'],
-          mainName,
-          fundingNumber: item['송장번호'],
-          characterCount,
-          variantType,
-          layerName: commonNameValue,
-          _orderName: `N${commonNameValue}`,
-          _mainName: commonNameValue,
-        };
+          return true;
+        }
       });
     };
     const wadizExcelUploadData = (jsonData: any) => {
-      // 리워드가 _01~_07 템플릿인지
+      // 리워드가 _01~_09 템플릿인지
       const templateFilteredData = jsonData.filter((item: any) =>
         excelFilterArray.some((filter) => item['리워드'].includes(filter)),
       );
 
-      // 베이직, 대용량 구분
-      const variantTypeFilteredData = templateFilteredData.filter((item: any) =>
-        item['리워드'].includes(VARIANT_TYPE_TEXT),
-      );
-
       // 옵션조건에서 공백 제거 후 길이를 계산하여 4글자 이하인 경우만
-      const characterCountFilteredData = variantTypeFilteredData.filter((item: any) => {
+      const characterCountFilteredData = templateFilteredData.filter((item: any) => {
         const cleanedOption = item['옵션조건'].replace(/\s+/g, ''); // 모든 공백 제거
         return cleanedOption.length <= 4;
       });
@@ -131,13 +134,31 @@ const SaveBulkExcelTemplate = ({ tabVariantType }: any) => {
       return countFilteredData.map((item: any, rowIndex: number) => {
         const match = item['리워드'].match(numberPattern);
         // 정규 표현식 매칭이 없는 경우, 빈 값을 반환하여 오류를 방지합니다.
-        const option = match ? `${parseInt(match[1], 10)}` : '0';
-        const variantType = INIT_VARIANT_TYPE;
-        const mainName = item['옵션조건'].replace(/\s+/g, ''); // 공백 제거
-        const characterCount = mainName.length.toString();
+        let INIT_VARIANT_TYPE;
+        if (item['리워드'].includes('베이직')) {
+          INIT_VARIANT_TYPE = getVariantType('베이직').INIT_VARIANT_TYPE;
+        } else if (item['리워드'].includes('대용량')) {
+          INIT_VARIANT_TYPE = getVariantType('대용량').INIT_VARIANT_TYPE;
+        }
 
-        let commonNameValue = `${variantType}${option}${characterCount}`;
-        if (option !== '2') commonNameValue = `${variantType}${option}3`;
+        const option = match ? `${parseInt(match[1], 10)}` : '0';
+        const templateNumber = Number(option);
+        const mainName = item['옵션조건'];
+
+        let characterCount = mainName.length.toString();
+
+        let layerName;
+        if (templateNumber === 2) {
+          // 2 템플릿
+          layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
+        } else if (templateNumber < 8) {
+          // 1, 3~7 템플릿
+          characterCount = Number(characterCount) < 4 ? '3' : '4';
+          layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
+        } else {
+          // 8~9 템플릿
+          layerName = `${INIT_VARIANT_TYPE}${templateNumber}9`;
+        }
 
         return {
           id: rowIndex,
@@ -148,10 +169,8 @@ const SaveBulkExcelTemplate = ({ tabVariantType }: any) => {
           mainName,
           fundingNumber: item['펀딩번호'],
           characterCount,
-          variantType,
-          layerName: commonNameValue,
-          _orderName: `N${commonNameValue}`,
-          _mainName: commonNameValue,
+          variantType: INIT_VARIANT_TYPE,
+          layerName,
         };
       });
     };
@@ -188,25 +207,77 @@ const SaveBulkExcelTemplate = ({ tabVariantType }: any) => {
       alertOptions: {},
       useLoading: false,
       apiFunc: async () => {
-        let response;
-        let progressOptions = {
-          value: 0,
-          total: Math.ceil(excelFilteredDataLength / MAX_TEMPLATES),
-          useProgress: true,
+        // 그룹화된 결과를 저장할 객체
+        const grouped: Record<string, ExcelTemplateData[]> = {
+          variantType1: [],
+          variantType2: [],
+          variantType3: [],
         };
-        for (let i = 0; i < excelFilteredDataLength; i += MAX_TEMPLATES) {
-          const templateData = excelFilteredData.slice(i, i + MAX_TEMPLATES);
-          const pdfName = templateData.map((item) => item.no).join('_');
-          templateData.forEach((item) => (item.pdfName = pdfName));
-          progressOptions.value = Math.ceil(i / MAX_TEMPLATES);
-          startLoading(progressOptions);
-          if (checked) {
-            response = await window.electron.savePDFAndTIFF({ templateData, pathData: configData });
-          } else {
-            response = await window.electron.savePDF({ templateData, pathData: configData });
+        // 배열을 순회하면서 각 객체를 해당 variantType에 맞는 배열에 넣음
+        excelFilteredData.forEach((item: ExcelTemplateData) => {
+          grouped[`variantType${item.variantType}`].push(item);
+        });
+
+        // 공통 작업을 수행하는 함수
+        const processTemplates = async (templates: ExcelTemplateData[], options: any) => {
+          let response;
+
+          for (let i = 0; i < templates.length; i += options.MAX_TEMPLATES) {
+            const templateData = templates.slice(i, i + options.MAX_TEMPLATES);
+            const pdfName = templateData.map((item) => item.no).join('_');
+            templateData.forEach((item) => (item.pdfName = pdfName));
+
+            options.value = Math.ceil(i / options.MAX_TEMPLATES);
+            startLoading(options);
+
+            response = checked
+              ? await window.electron.savePDFAndTIFF({ templateData, pathData: configData })
+              : await window.electron.savePDF({ templateData, pathData: configData });
+          }
+
+          return response;
+        };
+
+        let progressOptions = {
+          variantType1: {
+            value: 0,
+            total: Math.ceil(grouped.variantType1.length / 5),
+            type: '베이직',
+            MAX_TEMPLATES: 5,
+            useProgress: true,
+          },
+          variantType2: {
+            value: 0,
+            total: Math.ceil(grouped.variantType2.length / 2),
+            type: '대용량',
+            MAX_TEMPLATES: 2,
+            useProgress: true,
+          },
+          variantType3: {
+            value: 0,
+            total: Math.ceil(grouped.variantType3.length / 10),
+            MAX_TEMPLATES: 10,
+            useProgress: true,
+          },
+        };
+
+        // 각 그룹에 대해 처리
+        const entries = Object.entries(grouped);
+
+        let response;
+        for (let i = 0; i < entries.length; i++) {
+          const [variantType, templates] = entries[i] as [string, ExcelTemplateData[]];
+
+          if (templates.length > 0) {
+            if (variantType in progressOptions) {
+              response = await processTemplates(
+                templates,
+                progressOptions[variantType as keyof typeof progressOptions],
+              );
+            }
           }
         }
-        if (response?.success && checked) await window.electron.openFolder(configData.tiffSavePath);
+
         stopLoading();
         return response;
       },

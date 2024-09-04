@@ -160,12 +160,7 @@ const SaveSingleTemplate = ({ tabVariantType }: any) => {
       alertOptions: {},
       apiFunc: async () => {
         if (checked) {
-          const response = await window.electron.savePDFAndTIFF({
-            templateData: updatedTemplateData,
-            pathData: configData,
-          });
-          if (response.success) await window.electron.openFolder(configData.tiffSavePath);
-          return response;
+          return window.electron.savePDFAndTIFF({ templateData: updatedTemplateData, pathData: configData });
         } else {
           return window.electron.savePDF({ templateData: updatedTemplateData, pathData: configData });
         }

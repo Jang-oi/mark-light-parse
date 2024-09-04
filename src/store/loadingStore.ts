@@ -4,6 +4,7 @@ interface ProgressOptions {
   useProgress: boolean;
   value: number;
   total: number;
+  type?: string;
   onComplete?: () => void;
 }
 

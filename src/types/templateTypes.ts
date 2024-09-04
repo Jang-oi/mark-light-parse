@@ -23,7 +23,5 @@ export interface ExcelTemplateData {
   characterCount: string;
   variantType: string;
   layerName: string;
-  _orderName: string;
-  _mainName: string;
   pdfName?: string;
 }
