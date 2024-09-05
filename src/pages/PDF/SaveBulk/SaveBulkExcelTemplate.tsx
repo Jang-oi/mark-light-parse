@@ -36,11 +36,10 @@ const SaveBulkExcelTemplate = () => {
   };
   const handleDrop = async (e: any) => {
     const acceptedFiles = e.target.files;
-    const { valid, message } = validateFiles(
-      acceptedFiles,
-      1,
+    const { valid, message } = validateFiles(acceptedFiles, 1, [
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    );
+      'application/vnd.ms-excel',
+    ]);
 
     if (!valid) {
       toast({

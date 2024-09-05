@@ -24,7 +24,7 @@ export default function SaveTiffPage() {
       filesData.push({ id: i, name: file.name, path: file.path, type: file.type });
     }
 
-    const { valid, message } = validateFiles(filesData, 5, 'application/pdf');
+    const { valid, message } = validateFiles(filesData, 5, ['application/pdf']);
 
     if (!valid) {
       toast({
