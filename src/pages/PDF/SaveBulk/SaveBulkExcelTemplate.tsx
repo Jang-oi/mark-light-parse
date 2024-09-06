@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card.tsx';
-import { excelFilterArray } from '@/utils/constant.ts';
 import { Input } from '@/components/ui/input.tsx';
 import { Label } from '@/components/ui/label.tsx';
 import { Button } from '@/components/ui/button.tsx';
@@ -57,9 +56,9 @@ const SaveBulkExcelTemplate = () => {
         if (!item['판매처 옵션']) return;
         if (!item['상품명'].includes('베이직') && !item['상품명'].includes('대용량')) return;
 
-        let isMainNaim = false;
+        let isMainName = false;
         const [mainNamePart, variantPart, templatePart] = item['판매처 옵션'].split(' / ');
-        const mainName = mainNamePart.split(': ')[1];
+        let mainName = mainNamePart.split(': ')[1];
         const variant = variantPart.split(': ')[1];
         const template = templatePart.split(': ')[1];
 
@@ -70,11 +69,12 @@ const SaveBulkExcelTemplate = () => {
         // 1 ~ 7 템플릿은 이름에서 공백 제거 후 길이를 계산하여 4글자 이하인 경우만
         if (templateNumber <= 7) {
           const cleanedOption = mainName.replace(/\s+/g, '');
-          isMainNaim = cleanedOption.length <= 4;
+          isMainName = cleanedOption.length <= 4;
+          mainName = cleanedOption;
         } else if (templateNumber === 8) {
           // 영어 대소문자, 공백, 쉼표, 마침표, 백틱만 허용
           const isEnglishOnly = /^[a-zA-Z ,.`]+$/.test(mainName);
-          if (isEnglishOnly && mainName.length <= 11) isMainNaim = true;
+          if (isEnglishOnly && mainName.length <= 11) isMainName = true;
         } else if (templateNumber === 9) {
           // mainName이 22글자 이하, subName이 4글자 이하이어야 함
           // 엑셀에서 subName 난감해서 못하는 중
@@ -82,7 +82,7 @@ const SaveBulkExcelTemplate = () => {
 
         const isItemCount = item['주문수량'] === 1;
 
-        if (isMainNaim && isTemplate && isItemCount) {
+        if (isMainName && isTemplate && isItemCount) {
           const { INIT_VARIANT_TYPE } = getVariantType(variant);
           let characterCount = mainName.length.toString();
 
@@ -115,62 +115,66 @@ const SaveBulkExcelTemplate = () => {
       });
     };
     const wadizExcelUploadData = (jsonData: any) => {
-      // 리워드가 _01~_09 템플릿인지
-      const templateFilteredData = jsonData.filter((item: any) =>
-        excelFilterArray.some((filter) => item['리워드'].includes(filter)),
-      );
+      return jsonData.filter((item: any, rowIndex: number) => {
+        let isMainName = false;
 
-      // 옵션조건에서 공백 제거 후 길이를 계산하여 4글자 이하인 경우만
-      const characterCountFilteredData = templateFilteredData.filter((item: any) => {
-        const cleanedOption = item['옵션조건'].replace(/\s+/g, ''); // 모든 공백 제거
-        return cleanedOption.length <= 4;
-      });
-
-      // 수량이 1개인 경우만
-      const countFilteredData = characterCountFilteredData.filter((item: any) => item['수량'] === 1);
-
-      // 데이터 변형
-      return countFilteredData.map((item: any, rowIndex: number) => {
+        let mainName = item['옵션조건'];
         const match = item['리워드'].match(numberPattern);
-        // 정규 표현식 매칭이 없는 경우, 빈 값을 반환하여 오류를 방지합니다.
-        let INIT_VARIANT_TYPE;
-        if (item['리워드'].includes('베이직')) {
-          INIT_VARIANT_TYPE = getVariantType('베이직').INIT_VARIANT_TYPE;
-        } else if (item['리워드'].includes('대용량')) {
-          INIT_VARIANT_TYPE = getVariantType('대용량').INIT_VARIANT_TYPE;
-        }
-
         const option = match ? `${parseInt(match[1], 10)}` : '0';
+
         const templateNumber = Number(option);
-        const mainName = item['옵션조건'];
+        const isTemplate = templateNumber >= 1 && templateNumber <= 8;
 
-        let characterCount = mainName.length.toString();
-
-        let layerName;
-        if (templateNumber === 2) {
-          // 2 템플릿
-          layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
-        } else if (templateNumber < 8) {
-          // 1, 3~7 템플릿
-          characterCount = Number(characterCount) < 4 ? '3' : '4';
-          layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
-        } else {
-          // 8~9 템플릿
-          layerName = `${INIT_VARIANT_TYPE}${templateNumber}9`;
+        // 1 ~ 7 템플릿은 이름에서 공백 제거 후 길이를 계산하여 4글자 이하인 경우만
+        if (templateNumber <= 7) {
+          const cleanedOption = mainName.replace(/\s+/g, '');
+          isMainName = cleanedOption.length <= 4;
+          mainName = cleanedOption;
+        } else if (templateNumber === 8) {
+          // 영어 대소문자, 공백, 쉼표, 마침표, 백틱만 허용
+          const isEnglishOnly = /^[a-zA-Z ,.`]+$/.test(mainName);
+          if (isEnglishOnly && mainName.length <= 11) isMainName = true;
+        } else if (templateNumber === 9) {
+          // mainName이 22글자 이하, subName이 4글자 이하이어야 함
+          // 엑셀에서 subName 난감해서 못하는 중
         }
 
-        return {
-          id: rowIndex,
-          no: item['No.'],
-          template: item['리워드'],
-          option,
-          orderName: item['받는사람 성명'],
-          mainName,
-          fundingNumber: item['펀딩번호'],
-          characterCount,
-          variantType: INIT_VARIANT_TYPE,
-          layerName,
-        };
+        const isItemCount = item['수량'] === 1;
+
+        if (isMainName && isTemplate && isItemCount) {
+          let variant = '베이직';
+          if (item['리워드'].includes('베이직')) variant = '베이직';
+          else if (item['리워드'].includes('대용량')) variant = '대용량';
+
+          const { INIT_VARIANT_TYPE } = getVariantType(variant);
+
+          let characterCount = mainName.length.toString();
+          let layerName;
+          if (templateNumber === 2) {
+            // 2 템플릿
+            layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
+          } else if (templateNumber < 8) {
+            // 1, 3~7 템플릿
+            characterCount = Number(characterCount) < 4 ? '3' : '4';
+            layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
+          } else {
+            // 8~9 템플릿
+            layerName = `${INIT_VARIANT_TYPE}${templateNumber}9`;
+          }
+
+          item.id = rowIndex;
+          item.no = item['No.'];
+          item.template = item['리워드'];
+          item.option = `${templateNumber}`;
+          item.orderName = item['받는사람 성명'];
+          item.mainName = mainName;
+          item.fundingNumber = item['펀딩번호'];
+          item.characterCount = characterCount;
+          item.variantType = INIT_VARIANT_TYPE;
+          item.layerName = layerName;
+
+          return true;
+        }
       });
     };
 
