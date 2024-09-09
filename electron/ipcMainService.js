@@ -26,12 +26,11 @@ export function setupIpcHandlers() {
 
   ipcMain.handle('savePDF', async (event, templateData, pathData) => {
     try {
-      const { illustratorInstallPath, pdfSavePath } = pathData;
+      const { illustratorInstallPath } = pathData;
       fs.writeFileSync(illustratorParamPath, JSON.stringify(templateData));
 
       const extendScriptCommand = `"${illustratorInstallPath}" -r "${illustratorScriptPath}"`;
       await execPromise(extendScriptCommand);
-      await shell.openPath(pdfSavePath);
 
       return createResponse(true, 'PDF 저장 완료');
     } catch (error) {
@@ -41,12 +40,11 @@ export function setupIpcHandlers() {
 
   ipcMain.handle('saveTIFF', async (event, pdfFileData, pathData) => {
     try {
-      const { photoshopInstallPath, tiffSavePath } = pathData;
+      const { photoshopInstallPath } = pathData;
       fs.writeFileSync(photoshopParamPath, JSON.stringify(pdfFileData));
 
       const extendScriptCommand = `"${photoshopInstallPath}" -r ${photoshopScriptPath}`;
       await execPromise(extendScriptCommand);
-      await shell.openPath(tiffSavePath);
 
       return createResponse(true, 'TIFF 저장 완료');
     } catch (error) {

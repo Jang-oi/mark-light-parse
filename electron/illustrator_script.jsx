@@ -43,14 +43,17 @@ function findGroupByName(currentLayer, groupName) {
 
 function processLayer(processParam) {
   var yOffset = processParam['yOffset'];
+  var xOffset = processParam['xOffset'];
   var currentLayer = processParam['currentLayer'];
   var orderName = processParam['orderName'];
   var mainName = processParam['mainName'];
   var subName = processParam['subName'];
   var resultLayer = processParam['resultLayer'];
   var fundingNumber = processParam['fundingNumber'];
+  var phoneNumber = processParam['phoneNumber'];
 
   var yOffsetPoints = yOffset * 2.83465; // 1mm = 2.83465pt
+  var xOffsetPoints = xOffset * 2.83465; // 1mm = 2.83465pt
 
   var mainNames = findGroupByName(currentLayer, 'MainNames');
   var mainNamesTextFrames = mainNames.textFrames;
@@ -88,6 +91,16 @@ function processLayer(processParam) {
     }
   }
 
+  var phoneNumbers = findGroupByName(currentLayer, 'phoneNumber');
+  if (phoneNumbers) {
+    var phoneNumbersTextFrames = phoneNumbers.textFrames;
+    var phoneNumbersTextFramesLength = phoneNumbersTextFrames.length;
+
+    for (var n = 0; n < phoneNumbersTextFramesLength; n++) {
+      subNamesTextFrames[n].contents = phoneNumber;
+    }
+  }
+
   // 레이어의 모든 객체를 타겟 레이어로 복사 및 Y축 좌표 조정
   var objects = currentLayer.pageItems;
   var length = objects.length;
@@ -96,6 +109,9 @@ function processLayer(processParam) {
     var sourceObject = objects[l];
     var duplicatedObject = sourceObject.duplicate(resultLayer);
     duplicatedObject.top -= yOffsetPoints;
+    if (xOffsetPoints) {
+      duplicatedObject.left += xOffsetPoints;
+    }
   }
 }
 
@@ -134,18 +150,37 @@ if (doc) {
   var pdfName = params[0].pdfName;
   var resultLayer = findLayerByName('결과물');
   // 각 항목 처리
-  for (var i = 0; i < params.length; i++) {
-    var processParam = {
-      currentLayer: findLayerByName(params[i].layerName),
-      yOffset: i * variantTypeNumber,
-      orderName: params[i].orderName,
-      mainName: params[i].mainName,
-      subName: params[i].subName,
-      fundingNumber: params[i].fundingNumber,
-      resultLayer: resultLayer,
-    };
+  if (params[0].variantType === 'D') {
+    for (var i = 0; i < params.length; i++) {
+      var xOffset = i % 2 === 1 ? 290 : 0;
+      var yOffset = Math.floor(i / 2) * 210;
+      var dogProcessParam = {
+        currentLayer: findLayerByName(params[i].layerName),
+        yOffset: yOffset,
+        xOffset: xOffset,
+        orderName: params[i].orderName,
+        mainName: params[i].mainName,
+        phoneNumber: params[i].phoneNumber,
+        fundingNumber: params[i].fundingNumber,
+        resultLayer: resultLayer,
+      };
 
-    processLayer(processParam);
+      processLayer(dogProcessParam);
+    }
+  } else {
+    for (var j = 0; j < params.length; j++) {
+      var nameProcessParam = {
+        currentLayer: findLayerByName(params[j].layerName),
+        yOffset: j * variantTypeNumber,
+        orderName: params[j].orderName,
+        mainName: params[j].mainName,
+        subName: params[j].subName,
+        fundingNumber: params[j].fundingNumber,
+        resultLayer: resultLayer,
+      };
+
+      processLayer(nameProcessParam);
+    }
   }
 
   var configFile = new File(configFilePath);

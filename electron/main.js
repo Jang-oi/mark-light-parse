@@ -12,7 +12,7 @@ let mainWindow, tray;
 const { preloadPath, runPath, trayPath } = paths;
 
 const browserOption = {
-  width: 1400,
+  width: 1680,
   height: 960,
   webPreferences: {
     nodeIntegration: true,

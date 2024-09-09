@@ -12,16 +12,9 @@ import { ExcelTemplateData } from '@/types/templateTypes.ts';
 import { validateFiles } from '@/utils/fileUtil.ts';
 import { Switch } from '@/components/ui/switch.tsx';
 import { useLoadingStore } from '@/store/loadingStore.ts';
+import { getVariantType } from '@/utils/constant.ts';
 
 const SaveBulkExcelTemplate = () => {
-  const getVariantType = (variantValue: string) => {
-    return {
-      MAX_TEMPLATES: variantValue === '베이직' ? 5 : 2,
-      INIT_VARIANT_TYPE: variantValue === '베이직' ? '1' : '2',
-      VARIANT_TYPE_TEXT: variantValue === '베이직' ? '베이직' : '대용량',
-    };
-  };
-
   const fileInputRef = useRef<any>(null);
   const { configData } = useConfigStore();
   const { startLoading, stopLoading } = useLoadingStore();

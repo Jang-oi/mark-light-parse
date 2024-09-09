@@ -5,6 +5,7 @@ export interface TemplateData {
   mainName: string;
   subName?: string;
   fundingNumber: string;
+  phoneNumber?: string;
   characterCount: string;
   variantType: string;
   _mainName?: string;
