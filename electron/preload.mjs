@@ -19,6 +19,9 @@ contextBridge.exposeInMainWorld('electron', {
   openFolder : async (path) => {
     return await ipcRenderer.invoke('openFolder', path);
   },
+  saveExcludedData: async ({excludedData, filePath, fileName}) => {
+    return await ipcRenderer.invoke('saveExcludedData', excludedData , filePath, fileName);
+  },
 });
 
 contextBridge.exposeInMainWorld('ipcRenderer', {

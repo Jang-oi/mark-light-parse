@@ -1,5 +1,7 @@
 import { ipcMain, shell } from 'electron';
 import { execPromise, paths } from './common.js';
+import path, { dirname } from 'node:path';
+import * as XLSX from 'xlsx';
 import fs from 'fs';
 
 import { createRequire } from 'module';
@@ -100,6 +102,25 @@ export function setupIpcHandlers() {
       return createResponse(true, '');
     } catch (error) {
       return createResponse(false, `폴더 오픈 중 오류 발생: ${error.message}`);
+    }
+  });
+
+  ipcMain.handle('saveExcludedData', async (event, excludedData, filePath, fileName) => {
+    try {
+      const excludedFileName = fileName.replace(/\.xlsx?$/, '_제외_데이터.xlsx'); // xlsx 또는 xls 처리
+      const dirPath = dirname(filePath);
+      const excludedFilePath = path.join(dirPath, excludedFileName);
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(excludedData);
+      XLSX.utils.book_append_sheet(wb, ws, 'Excluded Data');
+
+      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' });
+      fs.writeFileSync(excludedFilePath, wbout);
+
+      return createResponse(true, '');
+    } catch (error) {
+      return createResponse(false, `파일 저장 중 오류 발생: ${error.message}`);
     }
   });
 }

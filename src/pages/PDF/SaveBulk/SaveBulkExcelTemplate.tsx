@@ -52,7 +52,9 @@ const SaveBulkExcelTemplate = () => {
     }
 
     const ezAdminExcelUploadData = (jsonData: any) => {
-      return jsonData.filter((item: any, rowIndex: number) => {
+      const includedData: any = [];
+      const excludedData: any = [];
+      jsonData.forEach((item: any, rowIndex: number) => {
         if (!item['판매처 옵션']) return;
         if (!item['상품명'].includes('베이직') && !item['상품명'].includes('대용량')) return;
 
@@ -103,19 +105,24 @@ const SaveBulkExcelTemplate = () => {
           item.no = item['관리번호'];
           item.template = item['판매처 옵션'];
           item.option = `${templateNumber}`;
-          item.orderName = item['수령자이름'];
+          item.orderName = item['수령자이름'].slice(0, 4);
           item.mainName = mainName;
           item.fundingNumber = item['송장번호'];
           item.characterCount = characterCount;
           item.variantType = INIT_VARIANT_TYPE;
           item.layerName = layerName;
 
-          return true;
+          includedData.push(item);
+        } else {
+          excludedData.push(item);
         }
       });
+      return { includedData, excludedData };
     };
     const wadizExcelUploadData = (jsonData: any) => {
-      return jsonData.filter((item: any, rowIndex: number) => {
+      const includedData: any = [];
+      const excludedData: any = [];
+      jsonData.forEach((item: any, rowIndex: number) => {
         let isMainName = false;
 
         let mainName = item['옵션조건'];
@@ -166,16 +173,19 @@ const SaveBulkExcelTemplate = () => {
           item.no = item['No.'];
           item.template = item['리워드'];
           item.option = `${templateNumber}`;
-          item.orderName = item['받는사람 성명'];
+          item.orderName = item['받는사람 성명'].slice(0, 4);
           item.mainName = mainName;
           item.fundingNumber = item['펀딩번호'];
           item.characterCount = characterCount;
           item.variantType = INIT_VARIANT_TYPE;
           item.layerName = layerName;
 
-          return true;
+          includedData.push(item);
+        } else {
+          excludedData.push(item);
         }
       });
+      return { includedData, excludedData };
     };
 
     const file = acceptedFiles[0];
@@ -187,13 +197,14 @@ const SaveBulkExcelTemplate = () => {
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(sheet);
-      let resultData;
+      let resultData, excludedData;
       if (file.name.includes('확장주문')) {
-        resultData = ezAdminExcelUploadData(jsonData);
+        ({ includedData: resultData, excludedData } = ezAdminExcelUploadData(jsonData));
       } else {
-        resultData = wadizExcelUploadData(jsonData);
+        ({ includedData: resultData, excludedData } = wadizExcelUploadData(jsonData));
       }
 
+      await window.electron.saveExcludedData({ filePath: file.path, fileName: file.name, excludedData });
       setExcelFilteredData(resultData);
       toast({ title: 'Excel Upload 완료' });
     };

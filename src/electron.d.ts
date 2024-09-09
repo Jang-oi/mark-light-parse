@@ -10,6 +10,7 @@ interface Electron {
   savePDFAndTIFF: (param: Record<string, any>) => Promise<Response>;
   getConfig: () => Promise<Response>;
   openFolder: (path: string) => Promise<Response>;
+  saveExcludedData: (param: Record<string, any>) => Promise<Response>;
 }
 
 interface IpcRenderer {
