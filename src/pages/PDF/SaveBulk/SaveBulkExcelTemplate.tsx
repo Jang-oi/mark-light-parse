@@ -13,11 +13,13 @@ import { validateFiles } from '@/utils/fileUtil.ts';
 import { Switch } from '@/components/ui/switch.tsx';
 import { useLoadingStore } from '@/store/loadingStore.ts';
 import { getVariantType } from '@/utils/constant.ts';
+import { useAlertStore } from '@/store/alertStore.ts';
 
 const SaveBulkExcelTemplate = () => {
   const fileInputRef = useRef<any>(null);
   const { configData } = useConfigStore();
   const { startLoading, stopLoading } = useLoadingStore();
+  const { setAlert } = useAlertStore();
   const handleAsyncTask = useHandleAsyncTask();
   const [excelFilteredData, setExcelFilteredData] = useState<ExcelTemplateData[]>([]);
   const [checked, setChecked] = useState(true);
@@ -197,9 +199,12 @@ const SaveBulkExcelTemplate = () => {
         ({ includedData: resultData, excludedData } = wadizExcelUploadData(jsonData));
       }
 
-      await window.electron.saveExcludedData({ filePath: file.path, fileName: file.name, excludedData });
+      const excludedDataLength = excludedData.length;
+      if (excludedDataLength) {
+        await window.electron.saveExcludedData({ filePath: file.path, fileName: file.name, excludedData });
+      }
       setExcelFilteredData(resultData);
-      toast({ title: 'Excel Upload 완료' });
+      setAlert({ title: 'Excel Upload 완료', description: `Excel 제외 건은 총 ${excludedDataLength}건 입니다.` });
     };
 
     reader.readAsArrayBuffer(file);
