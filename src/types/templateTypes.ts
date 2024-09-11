@@ -21,6 +21,7 @@ export interface ExcelTemplateData {
   orderName: string;
   mainName: string;
   fundingNumber: string;
+  phoneNumber?: string;
   characterCount: string;
   variantType: string;
   layerName: string;

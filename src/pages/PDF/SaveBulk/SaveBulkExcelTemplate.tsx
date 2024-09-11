@@ -14,6 +14,7 @@ import { Switch } from '@/components/ui/switch.tsx';
 import { useLoadingStore } from '@/store/loadingStore.ts';
 import { getVariantType } from '@/utils/constant.ts';
 import { useAlertStore } from '@/store/alertStore.ts';
+import { formatPhoneNumber } from '@/utils/helper.ts';
 
 const SaveBulkExcelTemplate = () => {
   const fileInputRef = useRef<any>(null);
@@ -49,69 +50,109 @@ const SaveBulkExcelTemplate = () => {
     const ezAdminExcelUploadData = (jsonData: any) => {
       const includedData: any = [];
       const excludedData: any = [];
+      const includedKeywords = ['베이직', '대용량', '강아지 스티커'];
       jsonData.forEach((item: any, rowIndex: number) => {
         if (!item['판매처 옵션']) return;
-        if (!item['상품명'].includes('베이직') && !item['상품명'].includes('대용량')) return;
+        if (!includedKeywords.some((keyword) => item['상품명'].includes(keyword))) return;
 
         let isMainName = false;
+        // 네임스티커 - 인쇄될 이름, 용량, 디자인
+        // 강아지스티커 - 인쇄될 이름, 전화번호, 강아지종
         const [mainNamePart, variantPart, templatePart] = item['판매처 옵션'].split(' / ');
+        const templateKind = templatePart.split(': ')[0];
+
         let mainName = mainNamePart.split(': ')[1];
         const variant = variantPart.split(': ')[1];
         const template = templatePart.split(': ')[1];
 
-        // 01~09 템플릿인지 확인
-        const templateNumber = parseInt(template.substring(0, 2), 10);
-        const isTemplate = templateNumber >= 1 && templateNumber <= 8;
+        // templateKind 디자인 = 네임스티커
+        if (templateKind === '디자인') {
+          // 01~09 템플릿인지 확인
+          const templateNumber = parseInt(template.substring(0, 2), 10);
+          const isTemplate = templateNumber >= 1 && templateNumber <= 8;
 
-        // 1 ~ 7 템플릿은 이름에서 공백 제거 후 길이를 계산하여 4글자 이하인 경우만
-        if (templateNumber <= 7) {
-          const cleanedOption = mainName.replace(/\s+/g, '');
-          isMainName = cleanedOption.length <= 4;
-          mainName = cleanedOption;
-        } else if (templateNumber === 8) {
-          // 영어 대소문자, 공백, 쉼표, 마침표, 백틱만 허용
-          const isEnglishOnly = /^[a-zA-Z ,.`]+$/.test(mainName);
-          if (isEnglishOnly && mainName.length <= 11) isMainName = true;
-        } else if (templateNumber === 9) {
-          // mainName이 22글자 이하, subName이 4글자 이하이어야 함
-          // 엑셀에서 subName 난감해서 못하는 중
-        }
-
-        const isItemCount = item['주문수량'] === 1;
-
-        if (isMainName && isTemplate && isItemCount) {
-          const { INIT_VARIANT_TYPE } = getVariantType(variant);
-          let characterCount = mainName.length.toString();
-
-          let layerName;
-          if (templateNumber === 2) {
-            // 2 템플릿
-            layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
-          } else if (templateNumber < 8) {
-            // 1, 3~7 템플릿
-            characterCount = Number(characterCount) < 4 ? '3' : '4';
-            layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
-          } else {
-            // 8~9 템플릿
-            layerName = `${INIT_VARIANT_TYPE}${templateNumber}9`;
+          // 1 ~ 7 템플릿은 이름에서 공백 제거 후 길이를 계산하여 2~4글자 이하인 경우만
+          if (templateNumber <= 7) {
+            const cleanedOption = mainName.replace(/\s+/g, '');
+            isMainName = cleanedOption.length >= 2 && cleanedOption.length <= 4;
+            mainName = cleanedOption;
+          } else if (templateNumber === 8) {
+            // 영어 대소문자, 공백, 쉼표, 마침표, 백틱만 허용
+            const isEnglishOnly = /^[a-zA-Z ,.`]+$/.test(mainName);
+            if (isEnglishOnly && mainName.length <= 11) isMainName = true;
+          } else if (templateNumber === 9) {
+            // mainName이 22글자 이하, subName이 4글자 이하이어야 함
+            // 엑셀에서 subName 난감해서 못하는 중
           }
 
-          item.id = rowIndex;
-          item.no = item['관리번호'];
-          item.template = item['판매처 옵션'];
-          item.option = `${templateNumber}`;
-          item.orderName = item['수령자이름'].slice(0, 4);
-          item.mainName = mainName;
-          item.fundingNumber = item['송장번호'];
-          item.characterCount = characterCount;
-          item.variantType = INIT_VARIANT_TYPE;
-          item.layerName = layerName;
+          const isItemCount = item['주문수량'] === 1;
 
-          includedData.push(item);
-        } else {
-          excludedData.push(item);
+          if (isMainName && isTemplate && isItemCount) {
+            const { INIT_VARIANT_TYPE } = getVariantType(variant);
+            let characterCount = mainName.length.toString();
+
+            let layerName;
+            if (templateNumber === 2) {
+              // 2 템플릿
+              layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
+            } else if (templateNumber < 8) {
+              // 1, 3~7 템플릿
+              characterCount = Number(characterCount) < 4 ? '3' : '4';
+              layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
+            } else {
+              // 8~9 템플릿
+              layerName = `${INIT_VARIANT_TYPE}${templateNumber}9`;
+            }
+
+            item.id = rowIndex;
+            item.no = item['관리번호'];
+            item.template = item['판매처 옵션'];
+            item.option = `${templateNumber}`;
+            item.orderName = item['수령자이름'].slice(0, 4);
+            item.mainName = mainName;
+            item.fundingNumber = item['송장번호'];
+            item.characterCount = characterCount;
+            item.variantType = INIT_VARIANT_TYPE;
+            item.layerName = layerName;
+
+            includedData.push(item);
+          } else {
+            excludedData.push(item);
+          }
+        } else if (templateKind === '강아지종') {
+          const isItemCount = item['주문수량'] === 1;
+
+          // 템플릿은 이름에서 공백 제거 후 길이를 계산하여 2~3글자인 경우만
+          const cleanedOption = mainName.replace(/\s+/g, '');
+          isMainName = cleanedOption.length >= 2 && cleanedOption.length <= 3;
+          mainName = cleanedOption;
+
+          if (isMainName && isItemCount) {
+            const { INIT_VARIANT_TYPE } = getVariantType('강아지');
+            const templateOption = template.substring(0, 2);
+            let characterCount = mainName.length.toString();
+
+            const layerName = `${INIT_VARIANT_TYPE}${templateOption}${characterCount}`;
+
+            item.id = rowIndex;
+            item.no = item['관리번호'];
+            item.template = item['판매처 옵션'];
+            item.option = `${templateOption}`;
+            item.orderName = item['수령자이름'].slice(0, 4);
+            item.mainName = mainName;
+            item.phoneNumber = formatPhoneNumber(variant);
+            item.fundingNumber = item['송장번호'];
+            item.characterCount = characterCount;
+            item.variantType = INIT_VARIANT_TYPE;
+            item.layerName = layerName;
+
+            includedData.push(item);
+          } else {
+            excludedData.push(item);
+          }
         }
       });
+
       return { includedData, excludedData };
     };
     const wadizExcelUploadData = (jsonData: any) => {
@@ -223,7 +264,7 @@ const SaveBulkExcelTemplate = () => {
         const grouped: Record<string, ExcelTemplateData[]> = {
           variantType1: [],
           variantType2: [],
-          variantType3: [],
+          variantTypeD: [],
         };
         // 배열을 순회하면서 각 객체를 해당 variantType에 맞는 배열에 넣음
         excelFilteredData.forEach((item: ExcelTemplateData) => {
@@ -265,9 +306,10 @@ const SaveBulkExcelTemplate = () => {
             MAX_TEMPLATES: 2,
             useProgress: true,
           },
-          variantType3: {
+          variantTypeD: {
             value: 0,
-            total: Math.ceil(grouped.variantType3.length / 10),
+            total: Math.ceil(grouped.variantTypeD.length / 10),
+            type: '강아지',
             MAX_TEMPLATES: 10,
             useProgress: true,
           },
@@ -317,9 +359,10 @@ const SaveBulkExcelTemplate = () => {
           <TableHeader>
             <TableRow>
               <TableHead>No</TableHead>
-              <TableHead className="w-[450px]">템플릿</TableHead>
+              <TableHead className="w-[500px]">템플릿</TableHead>
               <TableHead>수령자</TableHead>
               <TableHead>인쇄문구</TableHead>
+              <TableHead>핸드폰번호</TableHead>
               <TableHead>송장번호</TableHead>
             </TableRow>
           </TableHeader>
@@ -333,6 +376,9 @@ const SaveBulkExcelTemplate = () => {
                 </TableCell>
                 <TableCell>
                   <Input value={filteredItem.mainName} disabled />
+                </TableCell>
+                <TableCell>
+                  <Input value={filteredItem.phoneNumber} disabled />
                 </TableCell>
                 <TableCell>
                   <Input value={filteredItem.fundingNumber} disabled />

@@ -32,9 +32,9 @@ const SaveSingleNameTemplate = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>템플릿</TableHead>
-              <TableHead>수령자</TableHead>
-              <TableHead>
+              <TableHead className="w-1/5">템플릿</TableHead>
+              <TableHead className="w-1/5">수령자</TableHead>
+              <TableHead className="w-1/4">
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -54,8 +54,8 @@ const SaveSingleNameTemplate = () => {
                   </Tooltip>
                 </TooltipProvider>
               </TableHead>
-              <TableHead>송장번호</TableHead>
-              <TableHead>삭제</TableHead>
+              <TableHead className="w-1/4">송장번호</TableHead>
+              <TableHead className="w-1/12">삭제</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

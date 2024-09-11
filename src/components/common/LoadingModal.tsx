@@ -20,7 +20,7 @@ const LoadingModal = () => {
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-2xl text-center">
         <div className="w-16 h-16 mx-auto border-4 border-primary border-t-transparent rounded-full animate-spin" />
         <h2 className="text-2xl font-bold text-primary">잠시만 기다려주세요.</h2>
-        {type && <p>{type} 작업중입니다...</p>}
+        {type && <p>{type} 문서를 작업중입니다...</p>}
         {useProgress && (
           <>
             <Progress value={progressValue} className="w-full h-2" />

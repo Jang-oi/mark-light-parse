@@ -95,8 +95,11 @@ const SaveSingleTemplate = ({ tabVariantType }: { tabVariantType: TemplateType }
         return true;
       }
 
-      if (mainName.length > 4) {
-        toast({ title: '강아지 템플릿은 인쇄문구가 4글자 이하여야합니다.', variant: 'destructive' });
+      if (mainName.length < 2 || mainName.length > 3) {
+        toast({
+          title: '강아지 템플릿은 인쇄문구가 2~3글자여야 합니다.',
+          variant: 'destructive',
+        });
         return true;
       }
 

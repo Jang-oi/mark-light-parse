@@ -32,10 +32,10 @@ const SaveSingleDogTemplate = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>템플릿</TableHead>
-              <TableHead>수령자</TableHead>
-              <TableHead>인쇄문구</TableHead>
-              <TableHead>
+              <TableHead className="w-1/5">템플릿</TableHead>
+              <TableHead className="w-1/6">수령자</TableHead>
+              <TableHead className="w-1/6">인쇄문구</TableHead>
+              <TableHead className="w-1/5">
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -53,8 +53,8 @@ const SaveSingleDogTemplate = () => {
                   </Tooltip>
                 </TooltipProvider>
               </TableHead>
-              <TableHead>송장번호</TableHead>
-              <TableHead>삭제</TableHead>
+              <TableHead className="w-1/5">송장번호</TableHead>
+              <TableHead className="w-1/12">삭제</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

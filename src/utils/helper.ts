@@ -10,3 +10,10 @@ export const getDateFormat = () => {
 
   return `${year}${month}${day} ${hours}${minutes}${seconds}`;
 };
+
+export const formatPhoneNumber = (phoneNumber: string) => {
+  // Remove any non-digit characters (like hyphens)
+  const cleaned = phoneNumber.replace(/\D/g, '');
+  // Format the number to '010.1234.1234'
+  return cleaned.replace(/(\d{3})(\d{4})(\d{4})/, '$1.$2.$3');
+};
