@@ -2,47 +2,36 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card.tsx';
 import { Button } from '@/components/ui/button.tsx';
 import { useHandleAsyncTask } from '@/utils/handleAsyncTask.ts';
 import { Label } from '@/components/ui/label.tsx';
-import { Input } from '@/components/ui/input.tsx';
-import { useRef, useState } from 'react';
-import { toast } from '@/components/ui/use-toast.ts';
+import { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
-import { validateFiles } from '@/utils/fileUtil.ts';
 import { fileTypeData } from '@/types/fileTypes.ts';
 import { useConfigStore } from '@/store/configStore.ts';
+import { InputFileUpload } from '@/components/common/InputFileUpload.tsx';
 
 export default function SaveTiffPage() {
-  const fileInputRef = useRef<any>(null);
   const { configData } = useConfigStore();
   const [pdfFileData, setPdfFileData] = useState<fileTypeData[]>([]);
   const handleAsyncTask = useHandleAsyncTask();
 
-  const handleDrop = async (e: any) => {
-    const acceptedFiles = e.target.files;
-    const filesData: fileTypeData[] = [];
-    for (let i = 0; i < acceptedFiles.length; i++) {
-      const file = acceptedFiles[i];
-      filesData.push({ id: i, name: file.name, path: file.path, type: file.type });
-    }
-
-    const { valid, message } = validateFiles(filesData, 5, ['application/pdf']);
-
-    if (!valid) {
-      toast({
-        variant: 'destructive',
-        title: '파일 업로드 오류',
-        description: message,
-      });
-      fileInputRef.current.value = '';
-      setPdfFileData([]);
-      return;
-    }
+  const handleFileSelect = (acceptedFiles: any) => {
+    const filesData: fileTypeData[] = acceptedFiles.map((file: any, index: number) => ({
+      id: index,
+      name: file.name,
+      path: file.path,
+      type: file.type,
+    }));
 
     setPdfFileData(filesData);
   };
 
+  const handleFileReject = () => {
+    // 오류 발생 시 상태 초기화
+    setPdfFileData([]);
+  };
+
   const handleSaveTIFF = async () => {
     await handleAsyncTask({
-      validationFunc: () => fileInputRef.current.value === '',
+      validationFunc: () => pdfFileData.length === 0,
       validationMessage: 'PDF 파일이 정상적으로 업로드되어야 합니다.',
       apiFunc: async () => await window.electron.saveTIFF({ pdfFileData, pathData: configData }),
       alertOptions: {},
@@ -53,10 +42,15 @@ export default function SaveTiffPage() {
     <>
       <Card>
         <CardContent></CardContent>
-
         <div className="grid gap-6 m-3">
           <Label htmlFor="excel">PDF Upload</Label>
-          <Input id="excel" type="file" accept=".pdf" ref={fileInputRef} multiple onChange={handleDrop} />
+          <InputFileUpload
+            onFileSelect={handleFileSelect}
+            onFileReject={handleFileReject}
+            acceptedFileTypes="application/pdf"
+            maxFiles={5}
+            label="PDF (최대 5개 까지만 업로드 가능)"
+          />
           <CardFooter className="justify-center">
             <Button className="w-full" onClick={handleSaveTIFF}>
               TIFF 저장

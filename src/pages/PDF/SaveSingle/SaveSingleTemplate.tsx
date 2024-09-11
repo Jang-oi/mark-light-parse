@@ -13,18 +13,21 @@ import { useSingleTemplateDataStore } from '@/store/singleTemplateDataStore.ts';
 import SaveSingleNameTemplate from '@/pages/PDF/SaveSingle/SaveSingleNameTemplate.tsx';
 import SaveSingleDogTemplate from '@/pages/PDF/SaveSingle/SaveSingleDogTemplate.tsx';
 import { TemplateData } from '@/types/templateTypes.ts';
+import SaveSingleLogoTemplate from '@/pages/PDF/SaveSingle/SaveSingleLogoTemplate.tsx';
 
-type TemplateType = 'basic' | 'extra' | 'dog';
+type TemplateType = 'basic' | 'extra' | 'dog' | 'logo';
 const templateComponents: Record<TemplateType, any> = {
   basic: SaveSingleNameTemplate,
   extra: SaveSingleNameTemplate,
   dog: SaveSingleDogTemplate,
+  logo: SaveSingleLogoTemplate,
 };
 const SaveSingleTemplate = ({ tabVariantType }: { tabVariantType: TemplateType }) => {
   const { MAX_TEMPLATES, INIT_VARIANT_TYPE, VARIANT_TYPE_TEXT } = getVariantType(tabVariantType);
 
   const isNameSticker: boolean = tabVariantType === 'basic' || tabVariantType === 'extra';
   const isDogSticker: boolean = tabVariantType === 'dog';
+  const isLogoSticker: boolean = tabVariantType === 'logo';
 
   const { templateData, addTemplate, initializeTemplateData } = useSingleTemplateDataStore();
   const [checked, setChecked] = useState(true);
@@ -161,12 +164,14 @@ const SaveSingleTemplate = ({ tabVariantType }: { tabVariantType: TemplateType }
   return (
     <Card className="w-full">
       <TemplateComponent />
-      <CardFooter className="justify-center border-t">
-        <Button size="sm" variant="ghost" className="gap-1" onClick={handleAddTemplate}>
-          <PlusCircle className="h-3.5 w-3.5" />
-          Add Template
-        </Button>
-      </CardFooter>
+      {!isLogoSticker && (
+        <CardFooter className="justify-center border-t">
+          <Button size="sm" variant="ghost" className="gap-1" onClick={handleAddTemplate}>
+            <PlusCircle className="h-3.5 w-3.5" />
+            Add Template
+          </Button>
+        </CardFooter>
+      )}
       <CardFooter>
         <div className="flex items-center w-80">
           <Switch checked={checked} onCheckedChange={handleSwitchValue} />
