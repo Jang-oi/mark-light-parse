@@ -4,13 +4,13 @@ contextBridge.exposeInMainWorld('electron', {
   savePath: async (pathData) => {
     return await ipcRenderer.invoke('savePath', pathData);
   },
-  savePDF: async ({templateData, pathData}) => {
-    return await ipcRenderer.invoke('savePDF', templateData, pathData);
-  },
   saveTIFF: async ({pdfFileData,pathData}) => {
     return await ipcRenderer.invoke('saveTIFF', pdfFileData, pathData);
   },
-  savePDFAndTIFF : async ({templateData,pathData}) => {
+  savePDF: async ({templateData, pathData}) => {
+    return await ipcRenderer.invoke('savePDF', templateData, pathData);
+  },
+  savePDFAndTIFF : async ({templateData, pathData}) => {
     return await ipcRenderer.invoke('savePDFAndTIFF', templateData, pathData);
   },
   getConfig: async () => {
@@ -21,6 +21,12 @@ contextBridge.exposeInMainWorld('electron', {
   },
   saveExcludedData: async ({excludedData, filePath, fileName}) => {
     return await ipcRenderer.invoke('saveExcludedData', excludedData , filePath, fileName);
+  },
+  saveLogoPDF: async ({logoImageData, pathData}) => {
+    return await ipcRenderer.invoke('saveLogoPDF', logoImageData, pathData);
+  },
+  saveLogoPDFAndTIFF : async ({logoImageData, pathData}) => {
+    return await ipcRenderer.invoke('saveLogoPDFAndTIFF', logoImageData, pathData);
   },
 });
 

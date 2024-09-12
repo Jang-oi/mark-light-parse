@@ -43,11 +43,11 @@ export default function SaveTiffPage() {
       <Card>
         <CardContent></CardContent>
         <div className="grid gap-6 m-3">
-          <Label htmlFor="excel">PDF Upload</Label>
+          <Label htmlFor="pdf-upload">PDF Upload</Label>
           <InputFileUpload
             onFileSelect={handleFileSelect}
             onFileReject={handleFileReject}
-            acceptedFileTypes="application/pdf"
+            acceptedFileTypes={['application/pdf']}
             maxFiles={5}
             label="PDF (최대 5개 까지만 업로드 가능)"
           />

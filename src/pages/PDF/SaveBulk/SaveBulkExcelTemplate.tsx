@@ -1,23 +1,22 @@
-import { useRef, useState } from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card.tsx';
 import { Input } from '@/components/ui/input.tsx';
 import { Label } from '@/components/ui/label.tsx';
 import { Button } from '@/components/ui/button.tsx';
 import { useConfigStore } from '@/store/configStore.ts';
-import { toast } from '@/components/ui/use-toast.ts';
 import * as XLSX from 'xlsx';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
 import { useHandleAsyncTask } from '@/utils/handleAsyncTask.ts';
 import { ExcelTemplateData } from '@/types/templateTypes.ts';
-import { validateFiles } from '@/utils/fileUtil.ts';
 import { Switch } from '@/components/ui/switch.tsx';
 import { useLoadingStore } from '@/store/loadingStore.ts';
 import { getVariantType } from '@/utils/constant.ts';
 import { useAlertStore } from '@/store/alertStore.ts';
 import { formatPhoneNumber } from '@/utils/helper.ts';
+import { InputFileUpload } from '@/components/common/InputFileUpload.tsx';
+
+import { useState } from 'react';
 
 const SaveBulkExcelTemplate = () => {
-  const fileInputRef = useRef<any>(null);
   const { configData } = useConfigStore();
   const { startLoading, stopLoading } = useLoadingStore();
   const { setAlert } = useAlertStore();
@@ -29,24 +28,12 @@ const SaveBulkExcelTemplate = () => {
   const handleSwitchValue = (checked: boolean) => {
     setChecked(checked);
   };
-  const handleDrop = async (e: any) => {
-    const acceptedFiles = e.target.files;
-    const { valid, message } = validateFiles(acceptedFiles, 1, [
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-excel',
-    ]);
 
-    if (!valid) {
-      toast({
-        variant: 'destructive',
-        title: '파일 업로드 오류',
-        description: message,
-      });
-      fileInputRef.current.value = '';
-      setExcelFilteredData([]);
-      return;
-    }
-
+  const handleFileReject = () => {
+    // 오류 발생 시 상태 초기화
+    setExcelFilteredData([]);
+  };
+  const handleFileSelect = async (acceptedFiles: any) => {
     const ezAdminExcelUploadData = (jsonData: any) => {
       const includedData: any = [];
       const excludedData: any = [];
@@ -255,7 +242,7 @@ const SaveBulkExcelTemplate = () => {
     const excelFilteredDataLength = excelFilteredData.length;
 
     await handleAsyncTask({
-      validationFunc: () => excelFilteredDataLength < 0,
+      validationFunc: () => excelFilteredDataLength === 0,
       validationMessage: 'Excel 파일이 정상적으로 업로드되어야 합니다.',
       alertOptions: {},
       useLoading: false,
@@ -342,8 +329,16 @@ const SaveBulkExcelTemplate = () => {
     <Card>
       <CardContent />
       <div className="grid gap-6 m-3">
-        <Label htmlFor="excel">Excel Upload</Label>
-        <Input id="excel" type="file" accept=".xlsx, .xls, .csv" ref={fileInputRef} onChange={handleDrop} />
+        <Label htmlFor="excel-upload">Excel Upload</Label>
+        <InputFileUpload
+          onFileSelect={handleFileSelect}
+          onFileReject={handleFileReject}
+          acceptedFileTypes={[
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-excel',
+          ]}
+          label="Excel (xslx, xls) 파일을 업로드해주세요."
+        />
         <CardFooter>
           <div className="flex items-center w-80">
             <Switch checked={checked} onCheckedChange={handleSwitchValue} />

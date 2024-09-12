@@ -14,6 +14,7 @@ import SaveSingleNameTemplate from '@/pages/PDF/SaveSingle/SaveSingleNameTemplat
 import SaveSingleDogTemplate from '@/pages/PDF/SaveSingle/SaveSingleDogTemplate.tsx';
 import { TemplateData } from '@/types/templateTypes.ts';
 import SaveSingleLogoTemplate from '@/pages/PDF/SaveSingle/SaveSingleLogoTemplate.tsx';
+import { useSingleTemplateLogoStore } from '@/store/singleTemplateLogoStore.ts';
 
 type TemplateType = 'basic' | 'extra' | 'dog' | 'logo';
 const templateComponents: Record<TemplateType, any> = {
@@ -30,6 +31,7 @@ const SaveSingleTemplate = ({ tabVariantType }: { tabVariantType: TemplateType }
   const isLogoSticker: boolean = tabVariantType === 'logo';
 
   const { templateData, addTemplate, initializeTemplateData } = useSingleTemplateDataStore();
+  const { logoImageData } = useSingleTemplateLogoStore();
   const [checked, setChecked] = useState(true);
   const handleAsyncTask = useHandleAsyncTask();
   const { configData } = useConfigStore();
@@ -122,38 +124,55 @@ const SaveSingleTemplate = ({ tabVariantType }: { tabVariantType: TemplateType }
   };
 
   const handleSavePDF = async () => {
-    const updatedTemplateData = templateData.map((item: any) => {
-      // 9 템플릿은 subName 존재
-      if (item.option === '9') {
-        const parts = item.mainName.split('/');
-        item['_mainName'] = parts[0];
-        item['subName'] = parts[1];
-      }
-      return { ...item, pdfName: getDateFormat() };
-    });
-
-    let isValidTemplateData: (data: TemplateData[]) => boolean;
-
-    if (isNameSticker) {
-      isValidTemplateData = validateNameSticker;
-    } else if (isDogSticker) {
-      isValidTemplateData = validateDogSticker;
-    } else {
-      toast({ title: '지원하지 않는 템플릿 유형입니다.', variant: 'destructive' });
-      return;
-    }
-
-    await handleAsyncTask({
-      validationFunc: () => isValidTemplateData(updatedTemplateData),
-      alertOptions: {},
-      apiFunc: async () => {
-        if (checked) {
-          return window.electron.savePDFAndTIFF({ templateData: updatedTemplateData, pathData: configData });
-        } else {
-          return window.electron.savePDF({ templateData: updatedTemplateData, pathData: configData });
+    // 네임스티커
+    if (isNameSticker || isDogSticker) {
+      const updatedTemplateData = templateData.map((item: any) => {
+        // 9 템플릿은 subName 존재
+        if (item.option === '9') {
+          const parts = item.mainName.split('/');
+          item['_mainName'] = parts[0];
+          item['subName'] = parts[1];
         }
-      },
-    });
+        return { ...item, pdfName: getDateFormat() };
+      });
+
+      let isValidTemplateData: (data: TemplateData[]) => boolean;
+
+      if (isNameSticker) {
+        isValidTemplateData = validateNameSticker;
+      } else if (isDogSticker) {
+        isValidTemplateData = validateDogSticker;
+      } else {
+        toast({ title: '지원하지 않는 템플릿 유형입니다.', variant: 'destructive' });
+        return;
+      }
+
+      await handleAsyncTask({
+        validationFunc: () => isValidTemplateData(updatedTemplateData),
+        alertOptions: {},
+        apiFunc: async () => {
+          if (checked) {
+            return window.electron.savePDFAndTIFF({ templateData: updatedTemplateData, pathData: configData });
+          } else {
+            return window.electron.savePDF({ templateData: updatedTemplateData, pathData: configData });
+          }
+        },
+      });
+    } else {
+      //로고 스티커
+      await handleAsyncTask({
+        validationFunc: () => logoImageData.path === '',
+        validationMessage: 'Image 파일이 정상적으로 업로드 되야합니다.',
+        alertOptions: {},
+        apiFunc: async () => {
+          if (checked) {
+            return window.electron.saveLogoPDFAndTIFF({ logoImageData, pathData: configData });
+          } else {
+            return window.electron.saveLogoPDF({ logoImageData, pathData: configData });
+          }
+        },
+      });
+    }
   };
 
   useEffect(() => {

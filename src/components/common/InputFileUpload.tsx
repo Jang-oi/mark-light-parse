@@ -6,7 +6,7 @@ import { Upload } from 'lucide-react';
 interface InputFileUploadProps {
   onFileSelect: (files: File[]) => void;
   onFileReject?: () => void;
-  acceptedFileTypes: string;
+  acceptedFileTypes: string[];
   maxFileSize?: number;
   maxFiles?: number;
   label: string;
@@ -34,7 +34,7 @@ export function InputFileUpload({
       errors.push(`최대 ${maxFiles}개의 파일만 업로드할 수 있습니다.`);
     } else {
       selectedFiles.forEach((file) => {
-        if (!file.type.match(acceptedFileTypes)) {
+        if (!acceptedFileTypes.includes(file.type)) {
           errors.push(`${file.name}은(는) 지원되지 않는 파일 형식입니다.`);
         } else if (maxFileSize && file.size > maxFileSize) {
           errors.push(`${file.name}의 크기가 너무 큽니다. 최대 ${maxFileSize / (1024 * 1024)}MB까지 허용됩니다.`);
@@ -116,7 +116,7 @@ export function InputFileUpload({
             type="file"
             className="hidden"
             onChange={handleFileChange}
-            accept={acceptedFileTypes}
+            accept={acceptedFileTypes.join(',')}
             multiple={maxFiles > 1}
             ref={fileInputRef}
           />

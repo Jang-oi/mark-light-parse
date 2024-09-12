@@ -8,7 +8,15 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const { autoUpdater } = require('electron-updater');
 
-const { illustratorParamPath, illustratorScriptPath, photoshopParamPath, photoshopScriptPath, configFilePath } = paths;
+const {
+  illustratorParamPath,
+  illustratorScriptPath,
+  photoshopParamPath,
+  logoSaveParamPath,
+  logoSaveScriptPath,
+  photoshopScriptPath,
+  configFilePath,
+} = paths;
 const createResponse = (success, message = '', data = {}) => ({
   success,
   message,
@@ -119,6 +127,46 @@ export function setupIpcHandlers() {
       return createResponse(true, '');
     } catch (error) {
       return createResponse(false, `파일 저장 중 오류 발생: ${error.message}`);
+    }
+  });
+
+  ipcMain.handle('saveLogoPDF', async (event, logoImageData, pathData) => {
+    try {
+      const { illustratorInstallPath } = pathData;
+      fs.writeFileSync(logoSaveParamPath, JSON.stringify(logoImageData));
+
+      const extendScriptCommand = `"${illustratorInstallPath}" -r "${logoSaveScriptPath}"`;
+      await execPromise(extendScriptCommand);
+
+      return createResponse(true, 'PDF 저장 완료');
+    } catch (error) {
+      return createResponse(false, `PDF 저장 중 오류 발생: ${error.message}`);
+    }
+  });
+
+  ipcMain.handle('saveLogoPDFAndTIFF', async (event, logoImageData, pathData) => {
+    try {
+      const { illustratorInstallPath, photoshopInstallPath, pdfSavePath } = pathData;
+      fs.writeFileSync(logoSaveParamPath, JSON.stringify(logoImageData));
+
+      const illustratorExtendScriptCommand = `"${illustratorInstallPath}" -r "${logoSaveScriptPath}"`;
+      await execPromise(illustratorExtendScriptCommand);
+
+      const pdfFileData = [
+        {
+          name: logoImageData.pdfName,
+          path: `${pdfSavePath}${logoImageData.pdfName}.pdf`,
+        },
+      ];
+
+      fs.writeFileSync(photoshopParamPath, JSON.stringify(pdfFileData));
+
+      const photoshopExtendScriptCommand = `"${photoshopInstallPath}" -r ${photoshopScriptPath}`;
+      await execPromise(photoshopExtendScriptCommand);
+
+      return createResponse(true, 'PDF, TIFF 저장 완료');
+    } catch (error) {
+      return createResponse(false, `PDF, TIFF 저장 중 오류 발생: ${error.message}`);
     }
   });
 }

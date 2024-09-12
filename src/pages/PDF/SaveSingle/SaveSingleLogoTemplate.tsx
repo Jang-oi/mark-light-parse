@@ -1,22 +1,21 @@
 import { CardContent } from '@/components/ui/card';
 import { useState } from 'react';
-import { fileTypeData } from '@/types/fileTypes';
 import { Image as ImageIcon } from 'lucide-react';
 import { InputFileUpload } from '@/components/common/InputFileUpload.tsx';
+import { useSingleTemplateLogoStore } from '@/store/singleTemplateLogoStore.ts';
+import { getDateFormat } from '@/utils/helper.ts';
 
 export default function SaveSingleLogoTemplate() {
-  const [pngFileData, setPngFileData] = useState<fileTypeData[]>([]);
+  const { setLogoImageData } = useSingleTemplateLogoStore();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const handleFileSelect = (acceptedFiles: any) => {
-    const filesData: fileTypeData[] = acceptedFiles.map((file: any, index: number) => ({
-      id: index,
-      name: file.name,
-      path: file.path,
-      type: file.type,
-    }));
-
-    setPngFileData(filesData);
+    const filesData = {
+      name: acceptedFiles[0].name,
+      path: acceptedFiles[0].path,
+      pdfName: getDateFormat(),
+    };
+    setLogoImageData(filesData);
 
     // Create preview URL for the first PNG file
     if (acceptedFiles[0] && acceptedFiles[0].type === 'image/png') {
@@ -27,11 +26,9 @@ export default function SaveSingleLogoTemplate() {
 
   const handleFileReject = () => {
     // 오류 발생 시 상태 초기화
-    setPngFileData([]);
+    setLogoImageData({});
     setPreviewUrl(null);
   };
-
-  console.log(pngFileData);
 
   return (
     <>
@@ -39,7 +36,7 @@ export default function SaveSingleLogoTemplate() {
         <InputFileUpload
           onFileSelect={handleFileSelect}
           onFileReject={handleFileReject}
-          acceptedFileTypes="image/png"
+          acceptedFileTypes={['image/png']}
           maxFileSize={10 * 1024 * 1024} // 10MB
           label="PNG (최대 10MB 까지만 업로드 가능)"
         />
