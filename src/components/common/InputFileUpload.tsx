@@ -93,7 +93,7 @@ export function InputFileUpload({
     <div className="space-y-4">
       <div
         className={`flex items-center justify-center w-full ${
-          isDragging ? 'border-primary bg-primary/10' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'
+          isDragging ? 'border-primary bg-primary/10' : 'border-gray-200 hover:bg-gray-100'
         }`}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
@@ -102,7 +102,7 @@ export function InputFileUpload({
       >
         <label
           htmlFor="file-upload"
-          className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer"
+          className="flex flex-col items-center justify-center w-full h-32 border-2 rounded-lg cursor-pointer"
         >
           <div className="flex flex-col items-center justify-center pt-5 pb-6">
             <Upload className={`w-10 h-10 mb-3 ${isDragging ? 'text-primary' : 'text-gray-400'}`} />

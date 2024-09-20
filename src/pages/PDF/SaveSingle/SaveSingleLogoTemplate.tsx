@@ -48,7 +48,7 @@ export default function SaveSingleLogoTemplate() {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-64 border-2 border-gray-200 border-dashed rounded-lg">
+          <div className="flex flex-col items-center justify-center h-64 border-2 rounded-lg">
             <ImageIcon className="w-16 h-16 text-gray-400 mb-4" />
             <p className="text-gray-500">이미지를 업로드하면 여기에 미리보기가 표시됩니다.</p>
           </div>

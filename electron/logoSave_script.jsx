@@ -41,7 +41,44 @@ function findGroupByName(currentLayer, groupName) {
   return null;
 }
 
-function processLayer(processParam) {}
+function processLayer(processParam) {
+  var currentLayer = processParam['currentLayer'];
+  var resultLayer = processParam['resultLayer'];
+  var uploadedImagePath = processParam['imagePath'];
+
+  var imageBox = findGroupByName(currentLayer, 'imageBox');
+  var uploadedImageFile = new File(uploadedImagePath);
+
+  // imageBox 그룹 내의 모든 rasterItem(이미지) 찾기
+  var rasterItems = imageBox.rasterItems;
+  var rasterItemsLength = rasterItems.length;
+
+  for (var i = 0; i < rasterItemsLength; i++) {
+    var currentImage = rasterItems[i];
+
+    // 현재 이미지의 크기와 위치 저장
+    var originalWidth = currentImage.width;
+    var originalHeight = currentImage.height;
+    var originalTop = currentImage.top;
+    var originalLeft = currentImage.left;
+
+    // 기존 이미지 삭제
+    // currentImage.remove();
+
+    // 새로운 이미지 삽입
+    // var newImage = resultLayer.placedItems.add(uploadedImageFile);
+    resultLayer.placedItems.add();
+    resultLayer.placedItems[i].file = uploadedImageFile;
+    // myPlacedItem.file = uploadedImageFile;
+    // myPlacedItem.position = Array(0, 0);
+    // myPlacedItem.embed();
+    // 새 이미지 크기와 위치를 기존 이미지에 맞추기
+    /*    newImage.width = originalWidth;
+    newImage.height = originalHeight;
+    newImage.top = originalTop;
+    newImage.left = originalLeft;*/
+  }
+}
 
 function parseJSON(jsonStr) {
   // 간단한 JSON 파서
@@ -55,7 +92,7 @@ function parseJSON(jsonStr) {
 }
 
 function getFilePath(filePath, fileName) {
-  return filePath.replace(/illustrator_script\.jsx$/, fileName);
+  return filePath.replace(/logoSave_script\.jsx$/, fileName);
 }
 
 if (doc) {
@@ -73,8 +110,15 @@ if (doc) {
 
   var pdfName = params.pdfName;
   var resultLayer = findLayerByName('결과물');
-  // 각 항목 처리
-  // {"name":"고래의꿈.png","path":"C:\\Users\\JeongHo\\Desktop\\고래의꿈.png","pdfName":"20240912 162229"}
+
+  var processParam = {
+    currentLayer: findLayerByName('변환 전'),
+    yOffset: 0,
+    imagePath: params.path,
+    resultLayer: resultLayer,
+  };
+
+  processLayer(processParam);
 
   var configFile = new File(configFilePath);
 
