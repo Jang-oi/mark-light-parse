@@ -97,7 +97,7 @@ function processLayer(processParam) {
     var phoneNumbersTextFramesLength = phoneNumbersTextFrames.length;
 
     for (var n = 0; n < phoneNumbersTextFramesLength; n++) {
-      subNamesTextFrames[n].contents = phoneNumber;
+      phoneNumbersTextFrames[n].contents = phoneNumber;
     }
   }
 
