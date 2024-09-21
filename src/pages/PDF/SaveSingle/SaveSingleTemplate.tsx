@@ -161,7 +161,7 @@ const SaveSingleTemplate = ({ tabVariantType }: { tabVariantType: TemplateType }
     } else {
       //로고 스티커
       await handleAsyncTask({
-        validationFunc: () => logoImageData.path === '',
+        validationFunc: () => logoImageData.some((logoItem) => logoItem.path === ''),
         validationMessage: 'Image 파일이 정상적으로 업로드 되야합니다.',
         alertOptions: {},
         apiFunc: async () => {

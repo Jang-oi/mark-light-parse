@@ -149,13 +149,13 @@ export function setupIpcHandlers() {
       const { illustratorInstallPath, photoshopInstallPath, pdfSavePath } = pathData;
       fs.writeFileSync(logoSaveParamPath, JSON.stringify(logoImageData));
 
-      const illustratorExtendScriptCommand = `"${illustratorInstallPath}" -r "${logoSaveScriptPath}"`;
-      await execPromise(illustratorExtendScriptCommand);
+      const extendScriptCommand = `"${illustratorInstallPath}" -r "${logoSaveScriptPath}"`;
+      await execPromise(extendScriptCommand);
 
       const pdfFileData = [
         {
-          name: logoImageData.pdfName,
-          path: `${pdfSavePath}${logoImageData.pdfName}.pdf`,
+          name: logoImageData[0].pdfName,
+          path: `${pdfSavePath}${logoImageData[0].pdfName}.pdf`,
         },
       ];
 

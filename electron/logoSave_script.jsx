@@ -31,27 +31,18 @@ function findLayerByName(layerName) {
   return null;
 }
 
-function findGroupByName(currentLayer, groupName) {
-  var groups = currentLayer.groupItems;
-  for (var i = 0; i < groups.length; i++) {
-    if (groups[i].name === groupName) {
-      return groups[i];
-    }
-  }
-  return null;
-}
-
 function processLayer(processParam) {
   var currentLayer = processParam['currentLayer'];
   var resultLayer = processParam['resultLayer'];
   var uploadedImagePath = processParam['imagePath'];
+  var yOffset = processParam['yOffset'];
 
-  var imageBox = findGroupByName(currentLayer, 'imageBox');
   var uploadedImageFile = new File(uploadedImagePath);
 
-  // imageBox 그룹 내의 모든 rasterItem(이미지) 찾기
-  var rasterItems = imageBox.rasterItems;
+  var rasterItems = currentLayer.rasterItems;
   var rasterItemsLength = rasterItems.length;
+
+  var yOffsetPoints = yOffset * 2.83465; // 1mm = 2.83465pt
 
   for (var i = 0; i < rasterItemsLength; i++) {
     var currentImage = rasterItems[i];
@@ -61,22 +52,21 @@ function processLayer(processParam) {
     var originalHeight = currentImage.height;
     var originalTop = currentImage.top;
     var originalLeft = currentImage.left;
+    // var xOffsetPoints = xOffset * 2.83465; // 1mm = 2.83465pt
+    // 새 이미지를 결과 레이어에 추가
+    var myPlacedItem = resultLayer.placedItems.add();
+    myPlacedItem.file = uploadedImageFile;
 
-    // 기존 이미지 삭제
-    // currentImage.remove();
+    // 이미지의 비율을 유지하면서 새 이미지의 세로 크기를 originalHeight에 맞춤
+    var imageAspectRatio = myPlacedItem.width / myPlacedItem.height;
+    myPlacedItem.height = originalHeight;
+    myPlacedItem.width = originalHeight * imageAspectRatio; // 비율에 맞춰 가로 크기 조정
+    // 새 이미지의 위치를 기존 이미지의 위치와 동일하게 설정
 
-    // 새로운 이미지 삽입
-    // var newImage = resultLayer.placedItems.add(uploadedImageFile);
-    resultLayer.placedItems.add();
-    resultLayer.placedItems[i].file = uploadedImageFile;
-    // myPlacedItem.file = uploadedImageFile;
-    // myPlacedItem.position = Array(0, 0);
-    // myPlacedItem.embed();
-    // 새 이미지 크기와 위치를 기존 이미지에 맞추기
-    /*    newImage.width = originalWidth;
-    newImage.height = originalHeight;
-    newImage.top = originalTop;
-    newImage.left = originalLeft;*/
+    myPlacedItem.position = [originalLeft, originalTop - yOffsetPoints];
+
+    // 새 이미지 임베드
+    myPlacedItem.embed();
   }
 }
 
@@ -108,18 +98,18 @@ if (doc) {
   // JSON 문자열을 JavaScript 객체로 변환 (JSON.parse를 사용할 수 없으므로 직접 처리)
   var params = parseJSON(paramData);
 
-  var pdfName = params.pdfName;
+  var pdfName = params[0].pdfName;
   var resultLayer = findLayerByName('결과물');
 
-  var processParam = {
-    currentLayer: findLayerByName('변환 전'),
-    yOffset: 0,
-    imagePath: params.path,
-    resultLayer: resultLayer,
-  };
-
-  processLayer(processParam);
-
+  for (var i = 0; i < params.length; i++) {
+    var processParam = {
+      currentLayer: findLayerByName('변환 전'),
+      yOffset: i * 210,
+      imagePath: params[i].path,
+      resultLayer: resultLayer,
+    };
+    processLayer(processParam);
+  }
   var configFile = new File(configFilePath);
 
   configFile.open('r');
