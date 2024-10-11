@@ -39,6 +39,20 @@ export function InputFileUpload({
         } else if (maxFileSize && file.size > maxFileSize) {
           errors.push(`${file.name}의 크기가 너무 큽니다. 최대 ${maxFileSize / (1024 * 1024)}MB까지 허용됩니다.`);
         } else {
+          // 이미지 파일의 경우 사이즈 확인
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              const img = new Image();
+              img.src = event.target?.result as string;
+              img.onload = () => {
+                const width = img.width;
+                const height = img.height;
+                console.log(`${file.name}의 이미지 사이즈: ${width}x${height}`);
+              };
+            };
+            reader.readAsDataURL(file);
+          }
           validFiles.push(file);
         }
       });
