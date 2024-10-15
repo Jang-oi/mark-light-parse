@@ -44,6 +44,34 @@ function processLayer(processParam) {
 
   var yOffsetPoints = yOffset * 2.83465; // 1mm = 2.83465pt
 
+  var orderNames = findGroupByName(currentLayer, 'OrderNames');
+  var orderNamesTextFrames = orderNames.textFrames;
+  var orderNamesTextFramesLength = orderNamesTextFrames.length;
+
+  for (var j = 0; j < orderNamesTextFramesLength; j++) {
+    orderNamesTextFrames[j].contents = orderName;
+  }
+
+  var fundingNumberGroup = findGroupByName(currentLayer, 'fundingNumber');
+  if (fundingNumberGroup) {
+    var fundingNumberTextFrames = fundingNumberGroup.textFrames;
+    var fundingNumberTextFramesLength = fundingNumberTextFrames.length;
+
+    for (var k = 0; k < fundingNumberTextFramesLength; k++) {
+      fundingNumberTextFrames[k].contents = fundingNumber;
+    }
+  }
+
+  // 레이어의 모든 객체를 타겟 레이어로 복사 및 Y축 좌표 조정
+  var objects = currentLayer.pageItems;
+  var length = objects.length;
+
+  for (var l = length - 1; l >= 0; l--) {
+    var sourceObject = objects[l];
+    var duplicatedObject = sourceObject.duplicate(resultLayer);
+    duplicatedObject.top -= yOffsetPoints;
+  }
+
   for (var i = 0; i < rasterItemsLength; i++) {
     var currentImage = rasterItems[i];
 
@@ -57,11 +85,17 @@ function processLayer(processParam) {
     var myPlacedItem = resultLayer.placedItems.add();
     myPlacedItem.file = uploadedImageFile;
 
+    /*
     // 이미지의 비율을 유지하면서 새 이미지의 세로 크기를 originalHeight에 맞춤
     var imageAspectRatio = myPlacedItem.width / myPlacedItem.height;
     myPlacedItem.height = originalHeight;
     myPlacedItem.width = originalHeight * imageAspectRatio; // 비율에 맞춰 가로 크기 조정
-    // 새 이미지의 위치를 기존 이미지의 위치와 동일하게 설정
+*/
+
+    // 이미지의 비율을 유지하면서 새 이미지의 가로 크기를 originalWidth에 맞춤
+    var imageAspectRatio = myPlacedItem.height / myPlacedItem.width; // 세로:가로 비율 계산
+    myPlacedItem.width = originalWidth;
+    myPlacedItem.height = originalWidth * imageAspectRatio; // 비율에 맞춰 세로 크기 조정
 
     myPlacedItem.position = [originalLeft, originalTop - yOffsetPoints];
 
@@ -103,7 +137,7 @@ if (doc) {
 
   for (var i = 0; i < params.length; i++) {
     var processParam = {
-      currentLayer: findLayerByName('변환 전'),
+      currentLayer: findLayerByName('S_40X20'),
       yOffset: i * 210,
       imagePath: params[i].path,
       resultLayer: resultLayer,
