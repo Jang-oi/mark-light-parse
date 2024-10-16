@@ -27,3 +27,14 @@ export interface ExcelTemplateData {
   layerName: string;
   pdfName?: string;
 }
+
+export interface LogoData {
+  name: string;
+  path: string;
+  pdfName: string;
+  option: string;
+  fundingNumber: string;
+  orderNames: string;
+  height: number;
+  width: number;
+}

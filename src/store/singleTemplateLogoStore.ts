@@ -1,11 +1,5 @@
 import { create } from 'zustand';
-
-// 상태 인터페이스 정의
-interface LogoData {
-  name: string;
-  path: string;
-  pdfName: string;
-}
+import { LogoData } from '@/types/templateTypes.ts';
 
 interface SingleTemplateLogoState {
   logoImageData: LogoData[]; // 배열 형태로 변경

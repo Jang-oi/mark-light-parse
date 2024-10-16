@@ -8,41 +8,39 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
-interface ImageData {
-  option: string;
-  fundingNumber: string;
-  orderNames: string;
-}
+import { LogoData } from '@/types/templateTypes.ts';
+import { FileWithDimensions } from '@/types/fileTypes.ts';
 
 export default function SaveSingleLogoTemplate() {
-  const { setLogoImageData } = useSingleTemplateLogoStore();
+  const { logoImageData, setLogoImageData } = useSingleTemplateLogoStore();
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [imageData, setImageData] = useState<ImageData[]>([]);
 
-  const handleFileSelect = (acceptedFiles: File[]) => {
+  const handleFileSelect = (acceptedFiles: FileWithDimensions[]) => {
     const filesData = acceptedFiles.map((file: any) => ({
       name: file.name,
       path: file.path,
       pdfName: getDateFormat(),
+      height: file.height,
+      width: file.width,
+      option: '',
+      fundingNumber: '',
+      orderNames: '',
     }));
 
     setLogoImageData(filesData);
     const newPreviewUrls = acceptedFiles.map((file) => URL.createObjectURL(file));
     setPreviewUrls(newPreviewUrls);
-    setImageData(new Array(newPreviewUrls.length).fill({ option: '', numberInput: '', textInput: '' }));
   };
 
   const handleFileReject = () => {
     setLogoImageData([]);
     setPreviewUrls([]);
-    setImageData([]);
   };
 
-  const handleDataChange = (index: number, field: keyof ImageData, value: string) => {
-    const newData = [...imageData];
+  const handleDataChange = (index: number, field: keyof LogoData, value: string) => {
+    const newData = [...logoImageData];
     newData[index] = { ...newData[index], [field]: value };
-    setImageData(newData);
+    setLogoImageData(newData);
   };
 
   return (
@@ -72,14 +70,14 @@ export default function SaveSingleLogoTemplate() {
                         <Label htmlFor={`option-${index}`}>옵션 선택</Label>
                         <Select
                           onValueChange={(value) => handleDataChange(index, 'option', value)}
-                          value={imageData[index]?.option}
+                          value={logoImageData[index]?.option}
                         >
                           <SelectTrigger id={`option-${index}`}>
                             <SelectValue placeholder="옵션을 선택하세요" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="option1">S_40X20</SelectItem>
-                            <SelectItem value="option2">S_60X30</SelectItem>
+                            <SelectItem value="S_40X20">S_40X20</SelectItem>
+                            <SelectItem value="S_60X30">S_60X30</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -88,7 +86,7 @@ export default function SaveSingleLogoTemplate() {
                         <Input
                           id={`number-${index}`}
                           placeholder="송장번호 입력하세요"
-                          value={imageData[index]?.fundingNumber}
+                          value={logoImageData[index]?.fundingNumber}
                           onChange={(e) => handleDataChange(index, 'fundingNumber', e.target.value)}
                         />
                       </div>
@@ -99,7 +97,7 @@ export default function SaveSingleLogoTemplate() {
                         id={`text-${index}`}
                         type="text"
                         placeholder="수령자를 입력하세요"
-                        value={imageData[index]?.orderNames}
+                        value={logoImageData[index]?.orderNames}
                         onChange={(e) => handleDataChange(index, 'orderNames', e.target.value)}
                       />
                     </div>

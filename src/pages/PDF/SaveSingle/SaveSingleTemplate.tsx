@@ -12,7 +12,7 @@ import { getDateFormat } from '@/utils/helper.ts';
 import { useSingleTemplateDataStore } from '@/store/singleTemplateDataStore.ts';
 import SaveSingleNameTemplate from '@/pages/PDF/SaveSingle/SaveSingleNameTemplate.tsx';
 import SaveSingleDogTemplate from '@/pages/PDF/SaveSingle/SaveSingleDogTemplate.tsx';
-import { TemplateData } from '@/types/templateTypes.ts';
+import { LogoData, TemplateData } from '@/types/templateTypes.ts';
 import SaveSingleLogoTemplate from '@/pages/PDF/SaveSingle/SaveSingleLogoTemplate.tsx';
 import { useSingleTemplateLogoStore } from '@/store/singleTemplateLogoStore.ts';
 
@@ -123,6 +123,24 @@ const SaveSingleTemplate = ({ tabVariantType }: { tabVariantType: TemplateType }
     });
   };
 
+  const validateLogoSticker = (data: LogoData[]) => {
+    if (data.length === 0) {
+      toast({ title: 'Image 가 업로드 되지 않았습니다.', variant: 'destructive' });
+      return true;
+    }
+
+    return data.some((item) => {
+      const { option, path, orderNames, fundingNumber } = item;
+
+      if (!option || !path || !orderNames || !fundingNumber) {
+        toast({ title: '옵션, 송장번호, 수령자는 필수입니다.', variant: 'destructive' });
+        return true;
+      }
+
+      return false;
+    });
+  };
+
   const handleSavePDF = async () => {
     // 네임스티커
     if (isNameSticker || isDogSticker) {
@@ -161,8 +179,7 @@ const SaveSingleTemplate = ({ tabVariantType }: { tabVariantType: TemplateType }
     } else {
       //로고 스티커
       await handleAsyncTask({
-        validationFunc: () => logoImageData.some((logoItem) => logoItem.path === ''),
-        validationMessage: 'Image 파일이 정상적으로 업로드 되야합니다.',
+        validationFunc: () => validateLogoSticker(logoImageData),
         alertOptions: {},
         apiFunc: async () => {
           if (checked) {

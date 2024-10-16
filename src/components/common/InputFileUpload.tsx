@@ -2,9 +2,10 @@ import React, { useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { Upload } from 'lucide-react';
+import { FileWithDimensions } from '@/types/fileTypes.ts';
 
 interface InputFileUploadProps {
-  onFileSelect: (files: File[]) => void;
+  onFileSelect: (files: FileWithDimensions[]) => void;
   onFileReject?: () => void;
   acceptedFileTypes: string[];
   maxFileSize?: number;
@@ -27,13 +28,15 @@ export function InputFileUpload({
     if (!files) return;
 
     const selectedFiles = Array.from(files);
-    const validFiles: File[] = [];
+    const validFiles: FileWithDimensions[] = [];
     const errors: string[] = [];
+
+    const imageLoadPromises: Promise<void>[] = [];
 
     if (selectedFiles.length > maxFiles) {
       errors.push(`최대 ${maxFiles}개의 파일만 업로드할 수 있습니다.`);
     } else {
-      selectedFiles.forEach((file) => {
+      selectedFiles.forEach((file: FileWithDimensions) => {
         if (!acceptedFileTypes.includes(file.type)) {
           errors.push(`${file.name}은(는) 지원되지 않는 파일 형식입니다.`);
         } else if (maxFileSize && file.size > maxFileSize) {
@@ -41,19 +44,26 @@ export function InputFileUpload({
         } else {
           // 이미지 파일의 경우 사이즈 확인
           if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              const img = new Image();
-              img.src = event.target?.result as string;
-              img.onload = () => {
-                const width = img.width;
-                const height = img.height;
-                console.log(`${file.name}의 이미지 사이즈: ${width}x${height}`);
+            const imageLoadPromise = new Promise<void>((resolve) => {
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target?.result as string;
+                img.onload = () => {
+                  file.width = img.width;
+                  file.height = img.height;
+                  validFiles.push(file);
+                  resolve(); // 이미지 로드 완료
+                };
               };
-            };
-            reader.readAsDataURL(file);
+              reader.readAsDataURL(file);
+            });
+
+            // Promise 리스트에 추가
+            imageLoadPromises.push(imageLoadPromise);
+          } else {
+            validFiles.push(file);
           }
-          validFiles.push(file);
         }
       });
     }
@@ -69,7 +79,9 @@ export function InputFileUpload({
       });
     }
 
-    if (validFiles.length > 0) onFileSelect(validFiles);
+    Promise.all(imageLoadPromises).then(() => {
+      if (validFiles.length > 0) onFileSelect(validFiles);
+    });
 
     // Reset the file input
     if (fileInputRef.current) fileInputRef.current.value = '';
