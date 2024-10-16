@@ -31,7 +31,7 @@ export interface ExcelTemplateData {
 export interface LogoData {
   name: string;
   path: string;
-  pdfName: string;
+  pdfName?: string;
   option: string;
   fundingNumber: string;
   orderNames: string;

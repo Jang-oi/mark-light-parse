@@ -1,23 +1,31 @@
-import { fileTypeData } from '@/types/fileTypes.ts';
+// px를 mm로 변환하는 함수
+function pxToMm(px: number) {
+  return px / 3.78; // 1mm = 3.78px 가정
+}
 
-export const validateFiles = (files: fileTypeData[], maxFiles: number, allowedTypes: string[]) => {
-  // 파일 개수 제한
-  if (files.length > maxFiles) {
-    return {
-      valid: false,
-      message: `최대 ${maxFiles}개의 파일만 업로드할 수 있습니다.`,
-    };
-  }
+// mm를 px로 변환하는 함수
+function mmToPx(mm: number) {
+  return mm * 3.78; // 1mm = 3.78px 가정
+}
 
-  // 파일 형식 검증
-  for (const file of files) {
-    if (!allowedTypes.includes(file.type)) {
-      return {
-        valid: false,
-        message: `정상적인 파일 형식만 업로드할 수 있습니다. 허용된 형식: ${allowedTypes.join(', ')}`,
-      };
-    }
-  }
+const extractNumbers = (str: string): { horizontal: number; vertical: number } => {
+  const parts = str.split('_')[1].split('X'); // '_' 기준으로 나누고 'X' 기준으로 나눔
+  const horizontal = parseInt(parts[0], 10); // 앞의 숫자
+  const vertical = parseInt(parts[1], 10); // 뒤의 숫자
+  return { horizontal, vertical };
+};
 
-  return { valid: true, message: '' };
+// 이미지 크기를 비율에 맞춰 조정한 후 mm로 리턴하는 함수
+export const isHorizontalType = (originalWidthPx: number, originalHeightPx: number, targetOption: string) => {
+  const { horizontal, vertical } = extractNumbers(targetOption);
+  const targetWidthPx = mmToPx(horizontal); // targetWidthMm 를 픽셀로 변환
+
+  const aspectRatio = originalHeightPx / originalWidthPx; // 원본 이미지의 비율 계산
+  const targetHeightPx = targetWidthPx * aspectRatio; // 비율에 맞춘 세로 크기 계산
+
+  const targetHeightMm = pxToMm(targetHeightPx); // 계산된 세로 크기를 mm로 변환
+
+  const heightMm = parseFloat(targetHeightMm.toFixed(3));
+
+  return vertical > heightMm;
 };

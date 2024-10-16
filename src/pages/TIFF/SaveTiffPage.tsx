@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { fileTypeData } from '@/types/fileTypes.ts';
 import { useConfigStore } from '@/store/configStore.ts';
 import { InputFileUpload } from '@/components/common/InputFileUpload.tsx';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 
 export default function SaveTiffPage() {
   const { configData } = useConfigStore();
@@ -56,22 +57,24 @@ export default function SaveTiffPage() {
               TIFF 저장
             </Button>
           </CardFooter>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>파일명</TableHead>
-                <TableHead>파일경로</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pdfFileData.map((pdfItem: fileTypeData) => (
-                <TableRow key={pdfItem.id}>
-                  <TableCell>{pdfItem.name}</TableCell>
-                  <TableCell>{pdfItem.path}</TableCell>
+          <ScrollArea className="h-80 rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>파일명</TableHead>
+                  <TableHead>파일경로</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {pdfFileData.map((pdfItem: fileTypeData) => (
+                  <TableRow key={pdfItem.id}>
+                    <TableCell>{pdfItem.name}</TableCell>
+                    <TableCell>{pdfItem.path}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
         </div>
       </Card>
     </>

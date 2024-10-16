@@ -15,6 +15,7 @@ import { formatPhoneNumber } from '@/utils/helper.ts';
 import { InputFileUpload } from '@/components/common/InputFileUpload.tsx';
 
 import { useState } from 'react';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 
 const SaveBulkExcelTemplate = () => {
   const { configData } = useConfigStore();
@@ -350,38 +351,40 @@ const SaveBulkExcelTemplate = () => {
             PDF 저장
           </Button>
         </CardFooter>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>No</TableHead>
-              <TableHead className="w-[500px]">템플릿</TableHead>
-              <TableHead>수령자</TableHead>
-              <TableHead>인쇄문구</TableHead>
-              <TableHead>핸드폰번호</TableHead>
-              <TableHead>송장번호</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {excelFilteredData.map((filteredItem: ExcelTemplateData) => (
-              <TableRow key={filteredItem.id}>
-                <TableCell>{filteredItem.no}</TableCell>
-                <TableCell>{filteredItem.template}</TableCell>
-                <TableCell>
-                  <Input value={filteredItem.orderName} disabled />
-                </TableCell>
-                <TableCell>
-                  <Input value={filteredItem.mainName} disabled />
-                </TableCell>
-                <TableCell>
-                  <Input value={filteredItem.phoneNumber} disabled />
-                </TableCell>
-                <TableCell>
-                  <Input value={filteredItem.fundingNumber} disabled />
-                </TableCell>
+        <ScrollArea className="h-80 rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>No</TableHead>
+                <TableHead className="w-[500px]">템플릿</TableHead>
+                <TableHead>수령자</TableHead>
+                <TableHead>인쇄문구</TableHead>
+                <TableHead>핸드폰번호</TableHead>
+                <TableHead>송장번호</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {excelFilteredData.map((filteredItem: ExcelTemplateData) => (
+                <TableRow key={filteredItem.id}>
+                  <TableCell>{filteredItem.no}</TableCell>
+                  <TableCell>{filteredItem.template}</TableCell>
+                  <TableCell>
+                    <Input value={filteredItem.orderName} disabled />
+                  </TableCell>
+                  <TableCell>
+                    <Input value={filteredItem.mainName} disabled />
+                  </TableCell>
+                  <TableCell>
+                    <Input value={filteredItem.phoneNumber} disabled />
+                  </TableCell>
+                  <TableCell>
+                    <Input value={filteredItem.fundingNumber} disabled />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </ScrollArea>
       </div>
     </Card>
   );

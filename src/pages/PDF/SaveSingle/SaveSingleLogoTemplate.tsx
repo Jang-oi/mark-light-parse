@@ -3,13 +3,13 @@ import { useState } from 'react';
 import { Image as ImageIcon } from 'lucide-react';
 import { InputFileUpload } from '@/components/common/InputFileUpload.tsx';
 import { useSingleTemplateLogoStore } from '@/store/singleTemplateLogoStore.ts';
-import { getDateFormat } from '@/utils/helper.ts';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LogoData } from '@/types/templateTypes.ts';
 import { FileWithDimensions } from '@/types/fileTypes.ts';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 
 export default function SaveSingleLogoTemplate() {
   const { logoImageData, setLogoImageData } = useSingleTemplateLogoStore();
@@ -19,7 +19,6 @@ export default function SaveSingleLogoTemplate() {
     const filesData = acceptedFiles.map((file: any) => ({
       name: file.name,
       path: file.path,
-      pdfName: getDateFormat(),
       height: file.height,
       width: file.width,
       option: '',
@@ -45,7 +44,7 @@ export default function SaveSingleLogoTemplate() {
 
   return (
     <>
-      <CardContent className="mt-6 space-y-8">
+      <CardContent className="mt-6 space-y-4">
         <InputFileUpload
           onFileSelect={handleFileSelect}
           onFileReject={handleFileReject}
@@ -55,59 +54,61 @@ export default function SaveSingleLogoTemplate() {
           maxFiles={5}
         />
         {previewUrls.length > 0 ? (
-          <Carousel className="w-full max-w-3xl mx-auto">
-            <CarouselContent>
-              {previewUrls.map((url, index) => (
-                <CarouselItem key={index}>
-                  <div className="relative p-6 space-y-4 rounded-lg shadow-md">
-                    <img
-                      src={url}
-                      alt={`PNG 미리보기 ${index + 1}`}
-                      className="rounded-lg object-contain w-full h-64 mb-4"
-                    />
-                    <div className="grid gap-4">
-                      <div className="space-y-2 w-full">
-                        <Label htmlFor={`option-${index}`}>옵션 선택</Label>
-                        <Select
-                          onValueChange={(value) => handleDataChange(index, 'option', value)}
-                          value={logoImageData[index]?.option}
-                        >
-                          <SelectTrigger id={`option-${index}`}>
-                            <SelectValue placeholder="옵션을 선택하세요" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="S_40X20">S_40X20</SelectItem>
-                            <SelectItem value="S_60X30">S_60X30</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`number-${index}`}>송장번호 입력</Label>
-                        <Input
-                          id={`number-${index}`}
-                          placeholder="송장번호 입력하세요"
-                          value={logoImageData[index]?.fundingNumber}
-                          onChange={(e) => handleDataChange(index, 'fundingNumber', e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor={`text-${index}`}>수령자 입력</Label>
-                      <Input
-                        id={`text-${index}`}
-                        type="text"
-                        placeholder="수령자를 입력하세요"
-                        value={logoImageData[index]?.orderNames}
-                        onChange={(e) => handleDataChange(index, 'orderNames', e.target.value)}
+          <ScrollArea className="h-80 rounded-md border">
+            <Carousel className="w-full max-w-3xl mx-auto">
+              <CarouselContent>
+                {previewUrls.map((url, index) => (
+                  <CarouselItem key={index}>
+                    <div className="relative p-2 space-y-4 rounded-lg shadow-md">
+                      <img
+                        src={url}
+                        alt={`PNG 미리보기 ${index + 1}`}
+                        className="rounded-lg object-contain w-full h-40 mb-4"
                       />
+                      <div className="grid gap-4 grid-cols-3">
+                        <div className="space-y-2 w-full">
+                          <Label htmlFor={`option-${index}`}>옵션 선택</Label>
+                          <Select
+                            onValueChange={(value) => handleDataChange(index, 'option', value)}
+                            value={logoImageData[index]?.option}
+                          >
+                            <SelectTrigger id={`option-${index}`}>
+                              <SelectValue placeholder="옵션을 선택하세요" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="S_40X20">S_40X20</SelectItem>
+                              <SelectItem value="S_60X30">S_60X30</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`number-${index}`}>송장번호 입력</Label>
+                          <Input
+                            id={`number-${index}`}
+                            placeholder="송장번호 입력하세요"
+                            value={logoImageData[index]?.fundingNumber}
+                            onChange={(e) => handleDataChange(index, 'fundingNumber', e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`text-${index}`}>수령자 입력</Label>
+                          <Input
+                            id={`text-${index}`}
+                            type="text"
+                            placeholder="수령자를 입력하세요"
+                            value={logoImageData[index]?.orderNames}
+                            onChange={(e) => handleDataChange(index, 'orderNames', e.target.value)}
+                          />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          </ScrollArea>
         ) : (
           <div className="flex flex-col items-center justify-center h-64 border-2 rounded-lg">
             <ImageIcon className="w-16 h-16 text-gray-400 mb-4" />

@@ -15,6 +15,7 @@ import SaveSingleDogTemplate from '@/pages/PDF/SaveSingle/SaveSingleDogTemplate.
 import { LogoData, TemplateData } from '@/types/templateTypes.ts';
 import SaveSingleLogoTemplate from '@/pages/PDF/SaveSingle/SaveSingleLogoTemplate.tsx';
 import { useSingleTemplateLogoStore } from '@/store/singleTemplateLogoStore.ts';
+import { isHorizontalType } from '@/utils/fileUtil.ts';
 
 type TemplateType = 'basic' | 'extra' | 'dog' | 'logo';
 const templateComponents: Record<TemplateType, any> = {
@@ -177,9 +178,17 @@ const SaveSingleTemplate = ({ tabVariantType }: { tabVariantType: TemplateType }
         },
       });
     } else {
-      //로고 스티커
+      const updatedLogoImageData = logoImageData.map((item: any) => {
+        return {
+          ...item,
+          pdfName: getDateFormat(),
+          isHorizontalType: isHorizontalType(item.width, item.height, item.option),
+        };
+      });
+
+      // 로고 스티커
       await handleAsyncTask({
-        validationFunc: () => validateLogoSticker(logoImageData),
+        validationFunc: () => validateLogoSticker(updatedLogoImageData),
         alertOptions: {},
         apiFunc: async () => {
           if (checked) {
