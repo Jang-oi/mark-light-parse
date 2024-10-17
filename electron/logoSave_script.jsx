@@ -31,6 +31,16 @@ function findLayerByName(layerName) {
   return null;
 }
 
+function findGroupByName(currentLayer, groupName) {
+  var groups = currentLayer.groupItems;
+  for (var i = 0; i < groups.length; i++) {
+    if (groups[i].name === groupName) {
+      return groups[i];
+    }
+  }
+  return null;
+}
+
 function processLayer(processParam) {
   var currentLayer = processParam['currentLayer'];
   var resultLayer = processParam['resultLayer'];
@@ -39,11 +49,6 @@ function processLayer(processParam) {
   var fundingNumber = processParam['fundingNumber'];
   var isHorizontalType = processParam['isHorizontalType'];
   var yOffset = processParam['yOffset'];
-
-  var uploadedImageFile = new File(uploadedImagePath);
-
-  var rasterItems = currentLayer.rasterItems;
-  var rasterItemsLength = rasterItems.length;
 
   var yOffsetPoints = yOffset * 2.83465; // 1mm = 2.83465pt
 
@@ -55,10 +60,6 @@ function processLayer(processParam) {
     for (var j = 0; j < orderNamesTextFramesLength; j++) {
       orderNamesTextFrames[j].contents = orderName;
     }
-
-    // OrderNames 그룹 복사 및 Y축 좌표 조정
-    var duplicatedOrderNames = orderNames.duplicate(resultLayer);
-    duplicatedOrderNames.top -= yOffsetPoints;
   }
 
   // fundingNumber 그룹 찾기
@@ -70,11 +71,12 @@ function processLayer(processParam) {
     for (var k = 0; k < fundingNumberTextFramesLength; k++) {
       fundingNumberTextFrames[k].contents = fundingNumber;
     }
-
-    // fundingNumber 그룹 복사 및 Y축 좌표 조정
-    var duplicatedFundingNumber = fundingNumberGroup.duplicate(resultLayer);
-    duplicatedFundingNumber.top -= yOffsetPoints;
   }
+
+  var uploadedImageFile = new File(uploadedImagePath);
+
+  var rasterItems = currentLayer.rasterItems;
+  var rasterItemsLength = rasterItems.length;
 
   for (var i = 0; i < rasterItemsLength; i++) {
     var currentImage = rasterItems[i];
@@ -84,27 +86,37 @@ function processLayer(processParam) {
     var originalHeight = currentImage.height;
     var originalTop = currentImage.top;
     var originalLeft = currentImage.left;
-    // 새 이미지를 결과 레이어에 추가
-    var myPlacedItem = resultLayer.placedItems.add();
-    myPlacedItem.file = uploadedImageFile;
-    var imageAspectRatio;
 
+    // 새 이미지를 currentLayer에 추가
+    var myPlacedItem = currentLayer.placedItems.add();
+    myPlacedItem.file = uploadedImageFile;
+
+    // 이미지의 비율을 유지하면서 크기 조정
+    var imageAspectRatio;
     if (isHorizontalType) {
-      // 이미지의 비율을 유지하면서 새 이미지의 가로 크기를 originalWidth에 맞춤
-      imageAspectRatio = myPlacedItem.height / myPlacedItem.width; // 세로:가로 비율 계산
+      imageAspectRatio = myPlacedItem.height / myPlacedItem.width;
       myPlacedItem.width = originalWidth;
-      myPlacedItem.height = originalWidth * imageAspectRatio; // 비율에 맞춰 세로 크기 조정
+      myPlacedItem.height = originalWidth * imageAspectRatio;
     } else {
-      // 이미지의 비율을 유지하면서 새 이미지의 세로 크기를 originalHeight에 맞춤
       imageAspectRatio = myPlacedItem.width / myPlacedItem.height;
       myPlacedItem.height = originalHeight;
-      myPlacedItem.width = originalHeight * imageAspectRatio; // 비율에 맞춰 가로 크기 조정
+      myPlacedItem.width = originalHeight * imageAspectRatio;
     }
+    // 위치 조정
+    myPlacedItem.position = [originalLeft, originalTop];
+    // 기존 이미지 삭제
+    // myPlacedItem.embed();
+    currentImage.remove();
+  }
 
-    myPlacedItem.position = [originalLeft, originalTop - yOffsetPoints];
+  // 레이어의 모든 객체를 타겟 레이어로 복사 및 Y축 좌표 조정
+  var objects = currentLayer.pageItems;
+  var length = objects.length;
 
-    // 새 이미지 임베드
-    myPlacedItem.embed();
+  for (var l = length - 1; l >= 0; l--) {
+    var sourceObject = objects[l];
+    var duplicatedObject = sourceObject.duplicate(resultLayer);
+    duplicatedObject.top -= yOffsetPoints;
   }
 }
 
