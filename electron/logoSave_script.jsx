@@ -35,6 +35,9 @@ function processLayer(processParam) {
   var currentLayer = processParam['currentLayer'];
   var resultLayer = processParam['resultLayer'];
   var uploadedImagePath = processParam['imagePath'];
+  var orderName = processParam['orderName'];
+  var fundingNumber = processParam['fundingNumber'];
+  var isHorizontalType = processParam['isHorizontalType'];
   var yOffset = processParam['yOffset'];
 
   var uploadedImageFile = new File(uploadedImagePath);
@@ -45,13 +48,20 @@ function processLayer(processParam) {
   var yOffsetPoints = yOffset * 2.83465; // 1mm = 2.83465pt
 
   var orderNames = findGroupByName(currentLayer, 'OrderNames');
-  var orderNamesTextFrames = orderNames.textFrames;
-  var orderNamesTextFramesLength = orderNamesTextFrames.length;
+  if (orderNames) {
+    var orderNamesTextFrames = orderNames.textFrames;
+    var orderNamesTextFramesLength = orderNamesTextFrames.length;
 
-  for (var j = 0; j < orderNamesTextFramesLength; j++) {
-    orderNamesTextFrames[j].contents = orderName;
+    for (var j = 0; j < orderNamesTextFramesLength; j++) {
+      orderNamesTextFrames[j].contents = orderName;
+    }
+
+    // OrderNames 그룹 복사 및 Y축 좌표 조정
+    var duplicatedOrderNames = orderNames.duplicate(resultLayer);
+    duplicatedOrderNames.top -= yOffsetPoints;
   }
 
+  // fundingNumber 그룹 찾기
   var fundingNumberGroup = findGroupByName(currentLayer, 'fundingNumber');
   if (fundingNumberGroup) {
     var fundingNumberTextFrames = fundingNumberGroup.textFrames;
@@ -60,16 +70,10 @@ function processLayer(processParam) {
     for (var k = 0; k < fundingNumberTextFramesLength; k++) {
       fundingNumberTextFrames[k].contents = fundingNumber;
     }
-  }
 
-  // 레이어의 모든 객체를 타겟 레이어로 복사 및 Y축 좌표 조정
-  var objects = currentLayer.pageItems;
-  var length = objects.length;
-
-  for (var l = length - 1; l >= 0; l--) {
-    var sourceObject = objects[l];
-    var duplicatedObject = sourceObject.duplicate(resultLayer);
-    duplicatedObject.top -= yOffsetPoints;
+    // fundingNumber 그룹 복사 및 Y축 좌표 조정
+    var duplicatedFundingNumber = fundingNumberGroup.duplicate(resultLayer);
+    duplicatedFundingNumber.top -= yOffsetPoints;
   }
 
   for (var i = 0; i < rasterItemsLength; i++) {
@@ -80,22 +84,22 @@ function processLayer(processParam) {
     var originalHeight = currentImage.height;
     var originalTop = currentImage.top;
     var originalLeft = currentImage.left;
-    // var xOffsetPoints = xOffset * 2.83465; // 1mm = 2.83465pt
     // 새 이미지를 결과 레이어에 추가
     var myPlacedItem = resultLayer.placedItems.add();
     myPlacedItem.file = uploadedImageFile;
+    var imageAspectRatio;
 
-    /*
-    // 이미지의 비율을 유지하면서 새 이미지의 세로 크기를 originalHeight에 맞춤
-    var imageAspectRatio = myPlacedItem.width / myPlacedItem.height;
-    myPlacedItem.height = originalHeight;
-    myPlacedItem.width = originalHeight * imageAspectRatio; // 비율에 맞춰 가로 크기 조정
-*/
-
-    // 이미지의 비율을 유지하면서 새 이미지의 가로 크기를 originalWidth에 맞춤
-    var imageAspectRatio = myPlacedItem.height / myPlacedItem.width; // 세로:가로 비율 계산
-    myPlacedItem.width = originalWidth;
-    myPlacedItem.height = originalWidth * imageAspectRatio; // 비율에 맞춰 세로 크기 조정
+    if (isHorizontalType) {
+      // 이미지의 비율을 유지하면서 새 이미지의 가로 크기를 originalWidth에 맞춤
+      imageAspectRatio = myPlacedItem.height / myPlacedItem.width; // 세로:가로 비율 계산
+      myPlacedItem.width = originalWidth;
+      myPlacedItem.height = originalWidth * imageAspectRatio; // 비율에 맞춰 세로 크기 조정
+    } else {
+      // 이미지의 비율을 유지하면서 새 이미지의 세로 크기를 originalHeight에 맞춤
+      imageAspectRatio = myPlacedItem.width / myPlacedItem.height;
+      myPlacedItem.height = originalHeight;
+      myPlacedItem.width = originalHeight * imageAspectRatio; // 비율에 맞춰 가로 크기 조정
+    }
 
     myPlacedItem.position = [originalLeft, originalTop - yOffsetPoints];
 
@@ -137,9 +141,12 @@ if (doc) {
 
   for (var i = 0; i < params.length; i++) {
     var processParam = {
-      currentLayer: findLayerByName('S_40X20'),
+      currentLayer: findLayerByName(params[i].option),
       yOffset: i * 210,
       imagePath: params[i].path,
+      orderName: params[i].orderName,
+      fundingNumber: params[i].fundingNumber,
+      isHorizontalType: params[i].isHorizontalType,
       resultLayer: resultLayer,
     };
     processLayer(processParam);

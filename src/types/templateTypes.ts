@@ -34,7 +34,7 @@ export interface LogoData {
   pdfName?: string;
   option: string;
   fundingNumber: string;
-  orderNames: string;
+  orderName: string;
   height: number;
   width: number;
 }

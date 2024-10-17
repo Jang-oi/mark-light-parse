@@ -130,10 +130,10 @@ export function setupIpcHandlers() {
     }
   });
 
-  ipcMain.handle('saveLogoPDF', async (event, logoImageData, pathData) => {
+  ipcMain.handle('saveLogoPDF', async (event, updatedLogoImageData, pathData) => {
     try {
       const { illustratorInstallPath } = pathData;
-      fs.writeFileSync(logoSaveParamPath, JSON.stringify(logoImageData));
+      fs.writeFileSync(logoSaveParamPath, JSON.stringify(updatedLogoImageData));
 
       const extendScriptCommand = `"${illustratorInstallPath}" -r "${logoSaveScriptPath}"`;
       await execPromise(extendScriptCommand);
@@ -144,18 +144,18 @@ export function setupIpcHandlers() {
     }
   });
 
-  ipcMain.handle('saveLogoPDFAndTIFF', async (event, logoImageData, pathData) => {
+  ipcMain.handle('saveLogoPDFAndTIFF', async (event, updatedLogoImageData, pathData) => {
     try {
       const { illustratorInstallPath, photoshopInstallPath, pdfSavePath } = pathData;
-      fs.writeFileSync(logoSaveParamPath, JSON.stringify(logoImageData));
+      fs.writeFileSync(logoSaveParamPath, JSON.stringify(updatedLogoImageData));
 
       const extendScriptCommand = `"${illustratorInstallPath}" -r "${logoSaveScriptPath}"`;
       await execPromise(extendScriptCommand);
 
       const pdfFileData = [
         {
-          name: logoImageData[0].pdfName,
-          path: `${pdfSavePath}${logoImageData[0].pdfName}.pdf`,
+          name: updatedLogoImageData[0].pdfName,
+          path: `${pdfSavePath}${updatedLogoImageData[0].pdfName}.pdf`,
         },
       ];
 

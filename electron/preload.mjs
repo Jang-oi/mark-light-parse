@@ -22,11 +22,11 @@ contextBridge.exposeInMainWorld('electron', {
   saveExcludedData: async ({excludedData, filePath, fileName}) => {
     return await ipcRenderer.invoke('saveExcludedData', excludedData , filePath, fileName);
   },
-  saveLogoPDF: async ({logoImageData, pathData}) => {
-    return await ipcRenderer.invoke('saveLogoPDF', logoImageData, pathData);
+  saveLogoPDF: async ({updatedLogoImageData, pathData}) => {
+    return await ipcRenderer.invoke('saveLogoPDF', updatedLogoImageData, pathData);
   },
-  saveLogoPDFAndTIFF : async ({logoImageData, pathData}) => {
-    return await ipcRenderer.invoke('saveLogoPDFAndTIFF', logoImageData, pathData);
+  saveLogoPDFAndTIFF : async ({updatedLogoImageData, pathData}) => {
+    return await ipcRenderer.invoke('saveLogoPDFAndTIFF', updatedLogoImageData, pathData);
   },
 });
 

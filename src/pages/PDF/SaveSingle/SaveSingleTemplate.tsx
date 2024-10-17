@@ -131,13 +131,14 @@ const SaveSingleTemplate = ({ tabVariantType }: { tabVariantType: TemplateType }
     }
 
     return data.some((item) => {
-      const { option, path, orderNames, fundingNumber } = item;
+      const { option, path, orderName, fundingNumber } = item;
 
-      if (!option || !path || !orderNames || !fundingNumber) {
+      if (!option || !path || !orderName || !fundingNumber) {
         toast({ title: '옵션, 송장번호, 수령자는 필수입니다.', variant: 'destructive' });
         return true;
       }
 
+      item.orderName = orderName.slice(0, 4);
       return false;
     });
   };
@@ -192,9 +193,9 @@ const SaveSingleTemplate = ({ tabVariantType }: { tabVariantType: TemplateType }
         alertOptions: {},
         apiFunc: async () => {
           if (checked) {
-            return window.electron.saveLogoPDFAndTIFF({ logoImageData, pathData: configData });
+            return window.electron.saveLogoPDFAndTIFF({ updatedLogoImageData, pathData: configData });
           } else {
-            return window.electron.saveLogoPDF({ logoImageData, pathData: configData });
+            return window.electron.saveLogoPDF({ updatedLogoImageData, pathData: configData });
           }
         },
       });

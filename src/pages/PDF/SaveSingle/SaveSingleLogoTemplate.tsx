@@ -23,7 +23,7 @@ export default function SaveSingleLogoTemplate() {
       width: file.width,
       option: '',
       fundingNumber: '',
-      orderNames: '',
+      orderName: '',
     }));
 
     setLogoImageData(filesData);
@@ -96,8 +96,8 @@ export default function SaveSingleLogoTemplate() {
                             id={`text-${index}`}
                             type="text"
                             placeholder="수령자를 입력하세요"
-                            value={logoImageData[index]?.orderNames}
-                            onChange={(e) => handleDataChange(index, 'orderNames', e.target.value)}
+                            value={logoImageData[index]?.orderName}
+                            onChange={(e) => handleDataChange(index, 'orderName', e.target.value)}
                           />
                         </div>
                       </div>
