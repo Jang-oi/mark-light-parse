@@ -73,13 +73,16 @@ function processLayer(processParam) {
     }
   }
 
-  var uploadedImageFile = new File(uploadedImagePath);
-
   var rasterItems = currentLayer.rasterItems;
   var rasterItemsLength = rasterItems.length;
 
   for (var i = 0; i < rasterItemsLength; i++) {
     var currentImage = rasterItems[i];
+
+    currentLayer.locked = false; // 레이어가 잠겨있지 않은지 확인
+    resultLayer.locked = false; // 레이어가 잠겨있지 않은지 확인
+    currentLayer.visible = true; // 레이어가 보이는지 확인
+    resultLayer.visible = true; // 레이어가 보이는지 확인
 
     // 현재 이미지의 크기와 위치 저장
     var originalWidth = currentImage.width;
@@ -87,7 +90,7 @@ function processLayer(processParam) {
     var originalTop = currentImage.top;
     var originalLeft = currentImage.left;
 
-    // 새 이미지를 currentLayer에 추가
+    var uploadedImageFile = new File(uploadedImagePath);
     var myPlacedItem = currentLayer.placedItems.add();
     myPlacedItem.file = uploadedImageFile;
 
@@ -105,7 +108,7 @@ function processLayer(processParam) {
     // 위치 조정
     myPlacedItem.position = [originalLeft, originalTop];
     // 기존 이미지 삭제
-    // myPlacedItem.embed();
+    myPlacedItem.embed();
     currentImage.remove();
   }
 
