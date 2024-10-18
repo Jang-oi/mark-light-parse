@@ -7,6 +7,10 @@ function savePDFCallBack(defaultPath) {
   var pdfSavePath = new File(defaultPath);
 
   if (pdfSavePath) {
+    // 레이어 가시성 상태 저장
+    var layers = doc.layers;
+    for (var i = 0; i < layers.length; i++) if (layers[i].name !== '결과물') layers[i].visible = false;
+
     // PDF 저장 옵션 설정
     var pdfOptions = new PDFSaveOptions();
     pdfOptions.compatibility = PDFCompatibility.ACROBAT7;
@@ -51,33 +55,30 @@ function processLayer(processParam) {
   var yOffset = processParam['yOffset'];
 
   var yOffsetPoints = yOffset * 2.83465; // 1mm = 2.83465pt
-
   var orderNames = findGroupByName(currentLayer, 'OrderNames');
   if (orderNames) {
     var orderNamesTextFrames = orderNames.textFrames;
     var orderNamesTextFramesLength = orderNamesTextFrames.length;
 
-    for (var j = 0; j < orderNamesTextFramesLength; j++) {
-      orderNamesTextFrames[j].contents = orderName;
-    }
+    for (var j = 0; j < orderNamesTextFramesLength; j++) orderNamesTextFrames[j].contents = orderName;
   }
 
-  // fundingNumber 그룹 찾기
   var fundingNumberGroup = findGroupByName(currentLayer, 'fundingNumber');
   if (fundingNumberGroup) {
     var fundingNumberTextFrames = fundingNumberGroup.textFrames;
     var fundingNumberTextFramesLength = fundingNumberTextFrames.length;
 
-    for (var k = 0; k < fundingNumberTextFramesLength; k++) {
-      fundingNumberTextFrames[k].contents = fundingNumber;
-    }
+    for (var k = 0; k < fundingNumberTextFramesLength; k++) fundingNumberTextFrames[k].contents = fundingNumber;
   }
 
   var rasterItems = currentLayer.rasterItems;
   var rasterItemsLength = rasterItems.length;
 
+  var uploadedImageFile = new File(uploadedImagePath);
+
   for (var i = 0; i < rasterItemsLength; i++) {
     var currentImage = rasterItems[i];
+    var myPlacedItem = currentLayer.placedItems.add();
 
     currentLayer.locked = false; // 레이어가 잠겨있지 않은지 확인
     resultLayer.locked = false; // 레이어가 잠겨있지 않은지 확인
@@ -90,8 +91,6 @@ function processLayer(processParam) {
     var originalTop = currentImage.top;
     var originalLeft = currentImage.left;
 
-    var uploadedImageFile = new File(uploadedImagePath);
-    var myPlacedItem = currentLayer.placedItems.add();
     myPlacedItem.file = uploadedImageFile;
 
     // 이미지의 비율을 유지하면서 크기 조정
