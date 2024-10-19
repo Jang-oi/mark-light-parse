@@ -4,12 +4,13 @@ import { Image as ImageIcon } from 'lucide-react';
 import { InputFileUpload } from '@/components/common/InputFileUpload.tsx';
 import { useSingleTemplateLogoStore } from '@/store/singleTemplateLogoStore.ts';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel.tsx';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LogoData } from '@/types/templateTypes.ts';
 import { FileWithDimensions } from '@/types/fileTypes.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { LOGO_TEMPLATES } from '@/utils/constant.ts';
 
 export default function SaveSingleLogoTemplate() {
   const { logoImageData, setLogoImageData } = useSingleTemplateLogoStore();
@@ -76,8 +77,13 @@ export default function SaveSingleLogoTemplate() {
                               <SelectValue placeholder="옵션을 선택하세요" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="S_40X20">S_40X20</SelectItem>
-                              <SelectItem value="S_60X30">S_60X30</SelectItem>
+                              <SelectGroup>
+                                {LOGO_TEMPLATES.map((logoItem) => (
+                                  <SelectItem key={logoItem.id} value={logoItem.option}>
+                                    {logoItem.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
                             </SelectContent>
                           </Select>
                         </div>

@@ -56,6 +56,11 @@ export const DOG_TEMPLATES = [
   { id: 43, option: '43', name: '43심플' },
 ];
 
+export const LOGO_TEMPLATES = [
+  { id: 1, option: 'S_40X20', name: 'S_40X20' },
+  { id: 2, option: 'S_60X30', name: 'S_60X30' },
+];
+
 export const getVariantType = (variantValue: string) => {
   let MAX_TEMPLATES = 0,
     INIT_VARIANT_TYPE = '',
