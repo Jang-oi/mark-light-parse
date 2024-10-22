@@ -95,7 +95,7 @@ function processLayer(processParam) {
 
     // 이미지의 비율을 유지하면서 크기 조정
     var imageAspectRatio;
-    if (isHorizontalType) {
+    if (isHorizontalType === 'true') {
       imageAspectRatio = myPlacedItem.height / myPlacedItem.width;
       myPlacedItem.width = originalWidth;
       myPlacedItem.height = originalWidth * imageAspectRatio;
