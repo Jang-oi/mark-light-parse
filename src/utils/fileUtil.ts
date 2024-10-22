@@ -16,16 +16,22 @@ const extractNumbers = (str: string): { horizontal: number; vertical: number } =
 };
 
 // 이미지 크기를 비율에 맞춰 조정한 후 mm로 리턴하는 함수
-export const isHorizontalType = (originalWidthPx: number, originalHeightPx: number, targetOption: string) => {
-  const { horizontal, vertical } = extractNumbers(targetOption);
-  const targetWidthPx = mmToPx(horizontal); // targetWidthMm 를 픽셀로 변환
+export const getNewWidthAndHeight = (originalWidthPx: number, originalHeightPx: number, targetOption: string) => {
+  const { horizontal: targetWidthMm, vertical: targetHeightMm } = extractNumbers(targetOption);
 
-  const aspectRatio = originalHeightPx / originalWidthPx; // 원본 이미지의 비율 계산
-  const targetHeightPx = targetWidthPx * aspectRatio; // 비율에 맞춘 세로 크기 계산
+  const targetWidthPx = mmToPx(targetWidthMm); // 타겟 가로 크기를 mm에서 px로 변환
+  const targetHeightPx = mmToPx(targetHeightMm); // 타겟 세로 크기를 mm에서 px로 변환
 
-  const targetHeightMm = pxToMm(targetHeightPx); // 계산된 세로 크기를 mm로 변환
+  const aspectRatio = originalWidthPx / originalHeightPx; // 원본 이미지 비율 계산
+  const calculatedHeightPx = targetWidthPx / aspectRatio; // 비율에 맞춰 가로 기준으로 세로 크기 계산
 
-  const heightMm = parseFloat(targetHeightMm.toFixed(3));
-
-  return vertical > heightMm;
+  // 높이가 기준을 초과하지 않으면 가로 기준, 초과하면 세로 기준으로 크기 조정
+  if (calculatedHeightPx <= targetHeightPx) {
+    const newHeightMm = pxToMm(calculatedHeightPx);
+    return { newWidth: targetWidthMm, newHeight: parseFloat(newHeightMm.toFixed(3)) };
+  } else {
+    const calculatedWidthPx = targetHeightPx * aspectRatio;
+    const newWidthMm = pxToMm(calculatedWidthPx);
+    return { newWidth: parseFloat(newWidthMm.toFixed(3)), newHeight: targetHeightMm };
+  }
 };

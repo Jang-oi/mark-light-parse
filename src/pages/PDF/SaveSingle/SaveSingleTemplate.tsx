@@ -15,7 +15,7 @@ import SaveSingleDogTemplate from '@/pages/PDF/SaveSingle/SaveSingleDogTemplate.
 import { LogoData, TemplateData } from '@/types/templateTypes.ts';
 import SaveSingleLogoTemplate from '@/pages/PDF/SaveSingle/SaveSingleLogoTemplate.tsx';
 import { useSingleTemplateLogoStore } from '@/store/singleTemplateLogoStore.ts';
-import { isHorizontalType } from '@/utils/fileUtil.ts';
+import { getNewWidthAndHeight } from '@/utils/fileUtil.ts';
 
 type TemplateType = 'basic' | 'extra' | 'dog' | 'logo';
 const templateComponents: Record<TemplateType, any> = {
@@ -183,7 +183,8 @@ const SaveSingleTemplate = ({ tabVariantType }: { tabVariantType: TemplateType }
         return {
           ...item,
           pdfName: getDateFormat(),
-          isHorizontalType: isHorizontalType(item.width, item.height, item.option),
+          newWidth: getNewWidthAndHeight(item.width, item.height, item.option).newWidth,
+          newHeight: getNewWidthAndHeight(item.width, item.height, item.option).newHeight,
         };
       });
 

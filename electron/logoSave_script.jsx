@@ -51,7 +51,8 @@ function processLayer(processParam) {
   var uploadedImagePath = processParam['imagePath'];
   var orderName = processParam['orderName'];
   var fundingNumber = processParam['fundingNumber'];
-  var isHorizontalType = processParam['isHorizontalType'];
+  var newWidth = processParam['newWidth'] * 2.83465;
+  var newHeight = processParam['newHeight'] * 2.83465;
   var yOffset = processParam['yOffset'];
 
   var yOffsetPoints = yOffset * 2.83465; // 1mm = 2.83465pt
@@ -85,26 +86,13 @@ function processLayer(processParam) {
     currentLayer.visible = true; // 레이어가 보이는지 확인
     resultLayer.visible = true; // 레이어가 보이는지 확인
 
-    // 현재 이미지의 크기와 위치 저장
-    var originalWidth = currentImage.width;
-    var originalHeight = currentImage.height;
     var originalTop = currentImage.top;
     var originalLeft = currentImage.left;
 
     myPlacedItem.file = uploadedImageFile;
 
-    // 이미지의 비율을 유지하면서 크기 조정
-    var imageAspectRatio;
-    if (isHorizontalType === 'true') {
-      imageAspectRatio = myPlacedItem.height / myPlacedItem.width;
-      myPlacedItem.width = originalWidth;
-      myPlacedItem.height = originalWidth * imageAspectRatio;
-    } else {
-      imageAspectRatio = myPlacedItem.width / myPlacedItem.height;
-      myPlacedItem.height = originalHeight;
-      myPlacedItem.width = originalHeight * imageAspectRatio;
-    }
-    // 위치 조정
+    myPlacedItem.width = newWidth;
+    myPlacedItem.height = newHeight;
     myPlacedItem.position = [originalLeft, originalTop];
     // 기존 이미지 삭제
     myPlacedItem.embed();
@@ -160,7 +148,8 @@ if (doc) {
       imagePath: params[i].path,
       orderName: params[i].orderName,
       fundingNumber: params[i].fundingNumber,
-      isHorizontalType: params[i].isHorizontalType,
+      newWidth: params[i].newWidth,
+      newHeight: params[i].newHeight,
       resultLayer: resultLayer,
     };
     processLayer(processParam);
