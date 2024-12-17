@@ -78,6 +78,10 @@ export const getVariantType = (variantValue: string) => {
     MAX_TEMPLATES = 10;
     INIT_VARIANT_TYPE = 'D';
     VARIANT_TYPE_TEXT = '강아지';
+  } else if (variantValue === '긴급') {
+    MAX_TEMPLATES = 2;
+    INIT_VARIANT_TYPE = 'E';
+    VARIANT_TYPE_TEXT = '긴급';
   }
 
   return { MAX_TEMPLATES, INIT_VARIANT_TYPE, VARIANT_TYPE_TEXT };

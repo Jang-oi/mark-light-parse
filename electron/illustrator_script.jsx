@@ -145,19 +145,20 @@ if (doc) {
 
   // 베이직, 대용량에 따라 길이 계산에 필요한 수
   var variantTypeNumber = 210;
-  if (params[0].variantType === '2') variantTypeNumber = 420;
+  var variantType = params[0].variantType;
+  if (variantType === '2' || variantType === 'E') variantTypeNumber = 420;
 
   var pdfName = params[0].pdfName;
   var resultLayer = findLayerByName('결과물');
   // 각 항목 처리
-  if (params[0].variantType === 'D') {
+  if (variantType === 'D') {
     for (var i = 0; i < params.length; i++) {
-      var xOffset = i % 2 === 1 ? 290 : 0;
-      var yOffset = Math.floor(i / 2) * 210;
+      var dogXOffset = i % 2 === 1 ? 290 : 0;
+      var dogYOffset = Math.floor(i / 2) * 210;
       var dogProcessParam = {
         currentLayer: findLayerByName(params[i].layerName),
-        yOffset: yOffset,
-        xOffset: xOffset,
+        yOffset: dogYOffset,
+        xOffset: dogXOffset,
         orderName: params[i].orderName,
         mainName: params[i].mainName,
         phoneNumber: params[i].phoneNumber,
@@ -167,15 +168,29 @@ if (doc) {
 
       processLayer(dogProcessParam);
     }
-  } else {
+  } else if (variantType === 'E') {
     for (var j = 0; j < params.length; j++) {
-      var nameProcessParam = {
+      var emergencyProcessParam = {
         currentLayer: findLayerByName(params[j].layerName),
         yOffset: j * variantTypeNumber,
         orderName: params[j].orderName,
         mainName: params[j].mainName,
         subName: params[j].subName,
         fundingNumber: params[j].fundingNumber,
+        resultLayer: resultLayer,
+      };
+
+      processLayer(emergencyProcessParam);
+    }
+  } else {
+    for (var k = 0; k < params.length; k++) {
+      var nameProcessParam = {
+        currentLayer: findLayerByName(params[k].layerName),
+        yOffset: k * variantTypeNumber,
+        orderName: params[k].orderName,
+        mainName: params[k].mainName,
+        subName: params[k].subName,
+        fundingNumber: params[k].fundingNumber,
         resultLayer: resultLayer,
       };
 

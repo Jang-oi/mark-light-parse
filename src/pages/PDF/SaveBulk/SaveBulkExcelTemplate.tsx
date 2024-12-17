@@ -211,7 +211,83 @@ const SaveBulkExcelTemplate = () => {
       });
       return { includedData, excludedData };
     };
+    const emergencyExcelUploadData = (jsonData: any) => {
+      const includedData: any = [];
+      const excludedData: any = [];
+      const includedKeywords = ['베이직', '대용량', '강아지 스티커'];
+      jsonData.forEach((item: any, rowIndex: number) => {
+        if (!item['판매처 옵션']) return;
+        if (!includedKeywords.some((keyword) => item['상품명'].includes(keyword))) return;
 
+        let isMainName = false;
+        // 네임스티커 - 인쇄될 이름, 용량, 디자인
+        // 강아지스티커 - 인쇄될 이름, 전화번호, 강아지종
+        const [mainNamePart, templatePart] = item['판매처 옵션'].split(' / ');
+        const templateKind = templatePart.split(': ')[0];
+
+        let mainName = mainNamePart.split(': ')[1];
+        const variant = '긴급';
+        const template = templatePart.split(': ')[1];
+
+        // templateKind 디자인 = 네임스티커
+        if (templateKind === '디자인') {
+          // 01~09 템플릿인지 확인
+          const templateNumber = parseInt(template.substring(0, 2), 10);
+          const isTemplate = templateNumber >= 1 && templateNumber <= 8;
+
+          // 1 ~ 7 템플릿은 이름에서 공백 제거 후 길이를 계산하여 2~4글자 이하인 경우만
+          if (templateNumber <= 7) {
+            const cleanedOption = mainName.replace(/\s+/g, '');
+            isMainName = cleanedOption.length >= 2 && cleanedOption.length <= 4;
+            mainName = cleanedOption;
+          } else if (templateNumber === 8) {
+            // 영어 대소문자, 공백, 쉼표, 마침표, 백틱만 허용
+            const isEnglishOnly = /^[a-zA-Z ,.`]+$/.test(mainName);
+            if (isEnglishOnly && mainName.length <= 11) isMainName = true;
+          } else if (templateNumber === 9) {
+            // mainName이 22글자 이하, subName이 4글자 이하이어야 함
+            // 엑셀에서 subName 난감해서 못하는 중
+          }
+
+          const isItemCount = item['주문수량'] === 1;
+
+          if (isMainName && isTemplate && isItemCount) {
+            const { INIT_VARIANT_TYPE } = getVariantType(variant);
+            let characterCount = mainName.length.toString();
+
+            let layerName;
+            if (templateNumber === 2) {
+              // 2 템플릿
+              layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
+            } else if (templateNumber < 8) {
+              // 1, 3~7 템플릿
+              characterCount = Number(characterCount) < 4 ? '3' : '4';
+              layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
+            } else {
+              // 8~9 템플릿
+              layerName = `${INIT_VARIANT_TYPE}${templateNumber}9`;
+            }
+
+            item.id = rowIndex;
+            item.no = item['관리번호'];
+            item.template = item['판매처 옵션'];
+            item.option = `${templateNumber}`;
+            item.orderName = item['수령자이름'].slice(0, 4);
+            item.mainName = mainName;
+            item.fundingNumber = item['송장번호'];
+            item.characterCount = characterCount;
+            item.variantType = INIT_VARIANT_TYPE;
+            item.layerName = layerName;
+
+            includedData.push(item);
+          } else {
+            excludedData.push(item);
+          }
+        }
+      });
+
+      return { includedData, excludedData };
+    };
     const file = acceptedFiles[0];
     const reader = new FileReader();
     reader.onload = async (e: any) => {
@@ -224,6 +300,8 @@ const SaveBulkExcelTemplate = () => {
       let resultData, excludedData;
       if (file.name.includes('확장주문')) {
         ({ includedData: resultData, excludedData } = ezAdminExcelUploadData(jsonData));
+      } else if (file.name.includes('긴급')) {
+        ({ includedData: resultData, excludedData } = emergencyExcelUploadData(jsonData));
       } else {
         ({ includedData: resultData, excludedData } = wadizExcelUploadData(jsonData));
       }
@@ -253,9 +331,13 @@ const SaveBulkExcelTemplate = () => {
           variantType1: [],
           variantType2: [],
           variantTypeD: [],
+          variantTypeE: [],
         };
         // 배열을 순회하면서 각 객체를 해당 variantType에 맞는 배열에 넣음
         excelFilteredData.forEach((item: ExcelTemplateData) => {
+          console.log(item);
+          if (!grouped[`variantType${item.variantType}`])
+            throw `No ${item.no} 가 정상적인 데이터가 아닙니다. Excel 에서 제거 후 확인해주세요.`;
           grouped[`variantType${item.variantType}`].push(item);
         });
 
@@ -299,6 +381,13 @@ const SaveBulkExcelTemplate = () => {
             total: Math.ceil(grouped.variantTypeD.length / 10),
             type: '강아지',
             MAX_TEMPLATES: 10,
+            useProgress: true,
+          },
+          variantTypeE: {
+            value: 0,
+            total: Math.ceil(grouped.variantTypeE.length / 2),
+            type: '긴급',
+            MAX_TEMPLATES: 2,
             useProgress: true,
           },
         };
