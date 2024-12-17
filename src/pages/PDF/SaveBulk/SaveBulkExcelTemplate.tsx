@@ -222,7 +222,7 @@ const SaveBulkExcelTemplate = () => {
         let isMainName = false;
         // 네임스티커 - 인쇄될 이름, 용량, 디자인
         // 강아지스티커 - 인쇄될 이름, 전화번호, 강아지종
-        const [mainNamePart, templatePart] = item['판매처 옵션'].split(' / ');
+        const [mainNamePart, _variantPart, templatePart] = item['판매처 옵션'].split(' / ');
         const templateKind = templatePart.split(': ')[0];
 
         let mainName = mainNamePart.split(': ')[1];
@@ -335,7 +335,6 @@ const SaveBulkExcelTemplate = () => {
         };
         // 배열을 순회하면서 각 객체를 해당 variantType에 맞는 배열에 넣음
         excelFilteredData.forEach((item: ExcelTemplateData) => {
-          console.log(item);
           if (!grouped[`variantType${item.variantType}`])
             throw `No ${item.no} 가 정상적인 데이터가 아닙니다. Excel 에서 제거 후 확인해주세요.`;
           grouped[`variantType${item.variantType}`].push(item);
