@@ -50,7 +50,10 @@ const SaveBulkExcelTemplate = () => {
         const templateKind = templatePart.split(': ')[0];
 
         let mainName = mainNamePart.split(': ')[1];
-        const variant = variantPart.split(': ')[1];
+        let variant = variantPart.split(': ')[1];
+        if (variant.includes('베이직')) variant = '베이직';
+        else if (variant.includes('대용량')) variant = '대용량';
+
         const template = templatePart.split(': ')[1];
 
         // templateKind 디자인 = 네임스티커
@@ -73,9 +76,7 @@ const SaveBulkExcelTemplate = () => {
             // 엑셀에서 subName 난감해서 못하는 중
           }
 
-          const isItemCount = item['주문수량'] === 1;
-
-          if (isMainName && isTemplate && isItemCount) {
+          if (isMainName && isTemplate) {
             const { INIT_VARIANT_TYPE } = getVariantType(variant);
             let characterCount = mainName.length.toString();
 
@@ -85,6 +86,7 @@ const SaveBulkExcelTemplate = () => {
               layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
             } else if (templateNumber < 8) {
               // 1, 3~7 템플릿
+              if (Number(characterCount) === 2) mainName = mainName.split('').join(' ');
               characterCount = Number(characterCount) < 4 ? '3' : '4';
               layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
             } else {
@@ -92,49 +94,55 @@ const SaveBulkExcelTemplate = () => {
               layerName = `${INIT_VARIANT_TYPE}${templateNumber}9`;
             }
 
-            item.id = rowIndex;
-            item.no = item['관리번호'];
-            item.template = item['판매처 옵션'];
-            item.option = `${templateNumber}`;
-            item.orderName = item['수령자이름'].slice(0, 4);
-            item.mainName = mainName;
-            item.fundingNumber = item['송장번호'];
-            item.characterCount = characterCount;
-            item.variantType = INIT_VARIANT_TYPE;
-            item.layerName = layerName;
+            const itemCount = Number(item['주문수량']);
+            for (let i = 0; i < itemCount; i++) {
+              const newItem = { ...item }; // 원본 객체 복사
+              newItem.id = `${rowIndex}_${i}`; // 고유 ID 생성
+              newItem.no = item['관리번호'];
+              newItem.template = item['판매처 옵션'];
+              newItem.option = `${templateNumber}`;
+              newItem.orderName = item['수령자이름'].slice(0, 4);
+              newItem.mainName = mainName;
+              newItem.fundingNumber = item['송장번호'];
+              newItem.characterCount = characterCount;
+              newItem.variantType = INIT_VARIANT_TYPE;
+              newItem.layerName = layerName;
 
-            includedData.push(item);
+              includedData.push(newItem);
+            }
           } else {
             excludedData.push(item);
           }
         } else if (templateKind === '강아지종') {
-          const isItemCount = item['주문수량'] === 1;
-
           // 템플릿은 이름에서 공백 제거 후 길이를 계산하여 2~3글자인 경우만
           const cleanedOption = mainName.replace(/\s+/g, '');
           isMainName = cleanedOption.length >= 2 && cleanedOption.length <= 3;
           mainName = cleanedOption;
 
-          if (isMainName && isItemCount) {
+          if (isMainName) {
             const { INIT_VARIANT_TYPE } = getVariantType('강아지');
             const templateOption = template.substring(0, 2);
             let characterCount = mainName.length.toString();
 
             const layerName = `${INIT_VARIANT_TYPE}${templateOption}${characterCount}`;
 
-            item.id = rowIndex;
-            item.no = item['관리번호'];
-            item.template = item['판매처 옵션'];
-            item.option = `${templateOption}`;
-            item.orderName = item['수령자이름'].slice(0, 4);
-            item.mainName = mainName;
-            item.phoneNumber = formatPhoneNumber(variant);
-            item.fundingNumber = item['송장번호'];
-            item.characterCount = characterCount;
-            item.variantType = INIT_VARIANT_TYPE;
-            item.layerName = layerName;
+            const itemCount = Number(item['주문수량']);
+            for (let i = 0; i < itemCount; i++) {
+              const newItem = { ...item }; // 원본 객체 복사
+              newItem.id = `${rowIndex}_${i}`; // 고유 ID 생성
+              newItem.no = item['관리번호'];
+              newItem.template = item['판매처 옵션'];
+              newItem.option = `${templateOption}`;
+              newItem.orderName = item['수령자이름'].slice(0, 4);
+              newItem.mainName = mainName;
+              newItem.phoneNumber = formatPhoneNumber(variant);
+              newItem.fundingNumber = item['송장번호'];
+              newItem.characterCount = characterCount;
+              newItem.variantType = INIT_VARIANT_TYPE;
+              newItem.layerName = layerName;
 
-            includedData.push(item);
+              includedData.push(newItem);
+            }
           } else {
             excludedData.push(item);
           }
@@ -170,9 +178,7 @@ const SaveBulkExcelTemplate = () => {
           // 엑셀에서 subName 난감해서 못하는 중
         }
 
-        const isItemCount = item['수량'] === 1;
-
-        if (isMainName && isTemplate && isItemCount) {
+        if (isMainName && isTemplate) {
           let variant = '베이직';
           if (item['리워드'].includes('베이직')) variant = '베이직';
           else if (item['리워드'].includes('대용량')) variant = '대용량';
@@ -186,6 +192,7 @@ const SaveBulkExcelTemplate = () => {
             layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
           } else if (templateNumber < 8) {
             // 1, 3~7 템플릿
+            if (Number(characterCount) === 2) mainName = mainName.split('').join(' ');
             characterCount = Number(characterCount) < 4 ? '3' : '4';
             layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
           } else {
@@ -193,18 +200,22 @@ const SaveBulkExcelTemplate = () => {
             layerName = `${INIT_VARIANT_TYPE}${templateNumber}9`;
           }
 
-          item.id = rowIndex;
-          item.no = item['No.'];
-          item.template = item['리워드'];
-          item.option = `${templateNumber}`;
-          item.orderName = item['받는사람 성명'].slice(0, 4);
-          item.mainName = mainName;
-          item.fundingNumber = item['펀딩번호'];
-          item.characterCount = characterCount;
-          item.variantType = INIT_VARIANT_TYPE;
-          item.layerName = layerName;
+          const itemCount = Number(item['수량']);
+          for (let i = 0; i < itemCount; i++) {
+            const newItem = { ...item }; // 원본 객체 복사
+            newItem.id = `${rowIndex}_${i}`; // 고유 ID 생성;
+            newItem.no = item['No.'];
+            newItem.template = item['리워드'];
+            newItem.option = `${templateNumber}`;
+            newItem.orderName = item['받는사람 성명'].slice(0, 4);
+            newItem.mainName = mainName;
+            newItem.fundingNumber = item['펀딩번호'];
+            newItem.characterCount = characterCount;
+            newItem.variantType = INIT_VARIANT_TYPE;
+            newItem.layerName = layerName;
 
-          includedData.push(item);
+            includedData.push(newItem);
+          }
         } else {
           excludedData.push(item);
         }
@@ -249,9 +260,7 @@ const SaveBulkExcelTemplate = () => {
             // 엑셀에서 subName 난감해서 못하는 중
           }
 
-          const isItemCount = item['주문수량'] === 1;
-
-          if (isMainName && isTemplate && isItemCount) {
+          if (isMainName && isTemplate) {
             const { INIT_VARIANT_TYPE } = getVariantType(variant);
             let characterCount = mainName.length.toString();
 
@@ -261,6 +270,7 @@ const SaveBulkExcelTemplate = () => {
               layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
             } else if (templateNumber < 8) {
               // 1, 3~7 템플릿
+              if (Number(characterCount) === 2) mainName = mainName.split('').join(' ');
               characterCount = Number(characterCount) < 4 ? '3' : '4';
               layerName = `${INIT_VARIANT_TYPE}${templateNumber}${characterCount}`;
             } else {
@@ -268,18 +278,22 @@ const SaveBulkExcelTemplate = () => {
               layerName = `${INIT_VARIANT_TYPE}${templateNumber}9`;
             }
 
-            item.id = rowIndex;
-            item.no = item['관리번호'];
-            item.template = item['판매처 옵션'];
-            item.option = `${templateNumber}`;
-            item.orderName = item['수령자이름'].slice(0, 4);
-            item.mainName = mainName;
-            item.fundingNumber = item['송장번호'];
-            item.characterCount = characterCount;
-            item.variantType = INIT_VARIANT_TYPE;
-            item.layerName = layerName;
+            const itemCount = Number(item['주문수량']);
+            for (let i = 0; i < itemCount; i++) {
+              const newItem = { ...item }; // 원본 객체 복사
+              newItem.id = `${rowIndex}_${i}`; // 고유 ID 생성;
+              newItem.no = item['관리번호'];
+              newItem.template = item['판매처 옵션'];
+              newItem.option = `${templateNumber}`;
+              newItem.orderName = item['수령자이름'].slice(0, 4);
+              newItem.mainName = mainName;
+              newItem.fundingNumber = item['송장번호'];
+              newItem.characterCount = characterCount;
+              newItem.variantType = INIT_VARIANT_TYPE;
+              newItem.layerName = layerName;
 
-            includedData.push(item);
+              includedData.push(newItem);
+            }
           } else {
             excludedData.push(item);
           }
