@@ -55,7 +55,7 @@ const SaveBulkExcelTemplate = () => {
         else if (variant.includes('대용량')) variant = '대용량';
 
         const template = templatePart.split(': ')[1];
-
+        const SNumber = item['출력차수']?.replace(/.*?(\d+)차\/(\d+)번.*/, '$1/$2') || '';
         // templateKind 디자인 = 네임스티커
         if (templateKind === '디자인') {
           // 01~09 템플릿인지 확인
@@ -100,6 +100,7 @@ const SaveBulkExcelTemplate = () => {
               newItem.id = `${rowIndex}_${i}`; // 고유 ID 생성
               newItem.no = item['관리번호'];
               newItem.template = item['판매처 옵션'];
+              newItem.SNumber = SNumber;
               newItem.option = `${templateNumber}`;
               newItem.orderName = item['수령자이름'].slice(0, 4);
               newItem.mainName = mainName;
@@ -132,6 +133,7 @@ const SaveBulkExcelTemplate = () => {
               newItem.id = `${rowIndex}_${i}`; // 고유 ID 생성
               newItem.no = item['관리번호'];
               newItem.template = item['판매처 옵션'];
+              newItem.SNumber = SNumber;
               newItem.option = `${templateOption}`;
               newItem.orderName = item['수령자이름'].slice(0, 4);
               newItem.mainName = mainName;
@@ -239,6 +241,7 @@ const SaveBulkExcelTemplate = () => {
         let mainName = mainNamePart.split(': ')[1];
         const variant = '긴급';
         const template = templatePart.split(': ')[1];
+        const SNumber = item['출력차수']?.replace(/.*?(\d+)차\/(\d+)번.*/, '$1/$2') || '';
 
         // templateKind 디자인 = 네임스티커
         if (templateKind === '디자인') {
@@ -284,6 +287,7 @@ const SaveBulkExcelTemplate = () => {
               newItem.id = `${rowIndex}_${i}`; // 고유 ID 생성;
               newItem.no = item['관리번호'];
               newItem.template = item['판매처 옵션'];
+              newItem.SNumber = SNumber;
               newItem.option = `${templateNumber}`;
               newItem.orderName = item['수령자이름'].slice(0, 4);
               newItem.mainName = mainName;

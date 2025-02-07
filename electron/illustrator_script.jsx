@@ -51,6 +51,7 @@ function processLayer(processParam) {
   var resultLayer = processParam['resultLayer'];
   var fundingNumber = processParam['fundingNumber'];
   var phoneNumber = processParam['phoneNumber'];
+  var SNumber = processParam['SNumber'];
 
   var yOffsetPoints = yOffset * 2.83465; // 1mm = 2.83465pt
   var xOffsetPoints = xOffset * 2.83465; // 1mm = 2.83465pt
@@ -98,6 +99,16 @@ function processLayer(processParam) {
 
     for (var n = 0; n < phoneNumbersTextFramesLength; n++) {
       phoneNumbersTextFrames[n].contents = phoneNumber;
+    }
+  }
+
+  var SNumbers = findGroupByName(currentLayer, 'SNumber');
+  if (SNumbers) {
+    var SNumbersTextFrames = SNumbers.textFrames;
+    var SNumbersTextFramesLength = SNumbersTextFrames.length;
+
+    for (var o = 0; o < SNumbersTextFramesLength; o++) {
+      SNumbersTextFrames[o].contents = SNumber;
     }
   }
 
@@ -163,6 +174,7 @@ if (doc) {
         mainName: params[i].mainName,
         phoneNumber: params[i].phoneNumber,
         fundingNumber: params[i].fundingNumber,
+        SNumber: params[i].SNumber,
         resultLayer: resultLayer,
       };
 
@@ -177,6 +189,7 @@ if (doc) {
         mainName: params[j].mainName,
         subName: params[j].subName,
         fundingNumber: params[j].fundingNumber,
+        SNumber: params[j].SNumber,
         resultLayer: resultLayer,
       };
 
@@ -191,6 +204,7 @@ if (doc) {
         mainName: params[k].mainName,
         subName: params[k].subName,
         fundingNumber: params[k].fundingNumber,
+        SNumber: params[k].SNumber,
         resultLayer: resultLayer,
       };
 
