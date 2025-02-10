@@ -138,6 +138,7 @@ if (doc) {
         phoneNumber: params[i].phoneNumber,
         fundingNumber: params[i].fundingNumber,
         SNumber: params[i].SNumber,
+        Tag: params[i].Tag,
         resultLayer: resultLayer,
       };
 
@@ -153,6 +154,7 @@ if (doc) {
         subName: params[j].subName,
         fundingNumber: params[j].fundingNumber,
         SNumber: params[j].SNumber,
+        Tag: params[j].Tag,
         resultLayer: resultLayer,
       };
 
@@ -168,6 +170,7 @@ if (doc) {
         subName: params[k].subName,
         fundingNumber: params[k].fundingNumber,
         SNumber: params[k].SNumber,
+        Tag: params[k].Tag,
         resultLayer: resultLayer,
       };
 
