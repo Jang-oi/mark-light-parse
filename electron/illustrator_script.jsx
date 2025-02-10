@@ -62,7 +62,7 @@ function processLayer(processParam) {
   var fundingNumber = processParam['fundingNumber'];
   var phoneNumber = processParam['phoneNumber'];
   var SNumber = processParam['SNumber'];
-  var Tag = processParam['Tag'];
+  var OrderTag = processParam['OrderTag'];
 
   var yOffsetPoints = yOffset * 2.83465; // 1mm = 2.83465pt
   var xOffsetPoints = xOffset * 2.83465; // 1mm = 2.83465pt
@@ -73,7 +73,7 @@ function processLayer(processParam) {
   updateTextFrames('SubNames', subName, currentLayer);
   updateTextFrames('phoneNumber', phoneNumber, currentLayer);
   updateTextFrames('SNumber', SNumber, currentLayer);
-  // updateTextFrames('Tag', Tag, currentLayer);
+  // updateTextFrames('OrderTag', OrderTag, currentLayer);
 
   // 레이어의 모든 객체를 타겟 레이어로 복사 및 Y축 좌표 조정
   var objects = currentLayer.pageItems;
@@ -138,7 +138,7 @@ if (doc) {
         phoneNumber: params[i].phoneNumber,
         fundingNumber: params[i].fundingNumber,
         SNumber: params[i].SNumber,
-        Tag: params[i].Tag,
+        OrderTag: params[i].OrderTag,
         resultLayer: resultLayer,
       };
 
@@ -154,7 +154,7 @@ if (doc) {
         subName: params[j].subName,
         fundingNumber: params[j].fundingNumber,
         SNumber: params[j].SNumber,
-        Tag: params[j].Tag,
+        OrderTag: params[j].OrderTag,
         resultLayer: resultLayer,
       };
 
@@ -170,7 +170,7 @@ if (doc) {
         subName: params[k].subName,
         fundingNumber: params[k].fundingNumber,
         SNumber: params[k].SNumber,
-        Tag: params[k].Tag,
+        OrderTag: params[k].OrderTag,
         resultLayer: resultLayer,
       };
 
