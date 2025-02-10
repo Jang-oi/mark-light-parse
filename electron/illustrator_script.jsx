@@ -41,6 +41,16 @@ function findGroupByName(currentLayer, groupName) {
   return null;
 }
 
+function updateTextFrames(groupName, content, currentLayer) {
+  var group = findGroupByName(currentLayer, groupName);
+  if (group) {
+    var textFrames = group.textFrames;
+    for (var i = 0; i < textFrames.length; i++) {
+      textFrames[i].contents = content;
+    }
+  }
+}
+
 function processLayer(processParam) {
   var yOffset = processParam['yOffset'];
   var xOffset = processParam['xOffset'];
@@ -52,65 +62,18 @@ function processLayer(processParam) {
   var fundingNumber = processParam['fundingNumber'];
   var phoneNumber = processParam['phoneNumber'];
   var SNumber = processParam['SNumber'];
+  var Tag = processParam['Tag'];
 
   var yOffsetPoints = yOffset * 2.83465; // 1mm = 2.83465pt
   var xOffsetPoints = xOffset * 2.83465; // 1mm = 2.83465pt
 
-  var mainNames = findGroupByName(currentLayer, 'MainNames');
-  var mainNamesTextFrames = mainNames.textFrames;
-  var mainNamesTextFramesLength = mainNamesTextFrames.length;
-
-  for (var i = 0; i < mainNamesTextFramesLength; i++) {
-    mainNamesTextFrames[i].contents = mainName;
-  }
-
-  var orderNames = findGroupByName(currentLayer, 'OrderNames');
-  var orderNamesTextFrames = orderNames.textFrames;
-  var orderNamesTextFramesLength = orderNamesTextFrames.length;
-
-  for (var j = 0; j < orderNamesTextFramesLength; j++) {
-    orderNamesTextFrames[j].contents = orderName;
-  }
-
-  var fundingNumberGroup = findGroupByName(currentLayer, 'fundingNumber');
-  if (fundingNumberGroup) {
-    var fundingNumberTextFrames = fundingNumberGroup.textFrames;
-    var fundingNumberTextFramesLength = fundingNumberTextFrames.length;
-
-    for (var k = 0; k < fundingNumberTextFramesLength; k++) {
-      fundingNumberTextFrames[k].contents = fundingNumber;
-    }
-  }
-
-  var subNames = findGroupByName(currentLayer, 'SubNames');
-  if (subNames) {
-    var subNamesTextFrames = subNames.textFrames;
-    var subNamesTextFramesLength = subNamesTextFrames.length;
-
-    for (var m = 0; m < subNamesTextFramesLength; m++) {
-      subNamesTextFrames[m].contents = subName;
-    }
-  }
-
-  var phoneNumbers = findGroupByName(currentLayer, 'phoneNumber');
-  if (phoneNumbers) {
-    var phoneNumbersTextFrames = phoneNumbers.textFrames;
-    var phoneNumbersTextFramesLength = phoneNumbersTextFrames.length;
-
-    for (var n = 0; n < phoneNumbersTextFramesLength; n++) {
-      phoneNumbersTextFrames[n].contents = phoneNumber;
-    }
-  }
-
-  var SNumbers = findGroupByName(currentLayer, 'SNumber');
-  if (SNumbers) {
-    var SNumbersTextFrames = SNumbers.textFrames;
-    var SNumbersTextFramesLength = SNumbersTextFrames.length;
-
-    for (var o = 0; o < SNumbersTextFramesLength; o++) {
-      SNumbersTextFrames[o].contents = SNumber;
-    }
-  }
+  updateTextFrames('MainNames', mainName, currentLayer);
+  updateTextFrames('OrderNames', orderName, currentLayer);
+  updateTextFrames('fundingNumber', fundingNumber, currentLayer);
+  updateTextFrames('SubNames', subName, currentLayer);
+  updateTextFrames('phoneNumber', phoneNumber, currentLayer);
+  updateTextFrames('SNumber', SNumber, currentLayer);
+  updateTextFrames('Tag', Tag, currentLayer);
 
   // 레이어의 모든 객체를 타겟 레이어로 복사 및 Y축 좌표 조정
   var objects = currentLayer.pageItems;
