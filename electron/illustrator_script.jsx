@@ -73,7 +73,7 @@ function processLayer(processParam) {
   updateTextFrames('SubNames', subName, currentLayer);
   updateTextFrames('phoneNumber', phoneNumber, currentLayer);
   updateTextFrames('SNumber', SNumber, currentLayer);
-  // updateTextFrames('OrderTag', OrderTag, currentLayer);
+  updateTextFrames('OrderTag', OrderTag, currentLayer);
 
   // 레이어의 모든 객체를 타겟 레이어로 복사 및 Y축 좌표 조정
   var objects = currentLayer.pageItems;

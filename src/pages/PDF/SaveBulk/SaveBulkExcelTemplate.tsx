@@ -56,7 +56,7 @@ const SaveBulkExcelTemplate = () => {
 
         const template = templatePart.split(': ')[1];
         const SNumber = item['출력차수']?.replace(/.*?(\d+)차\/(\d+)번.*/, '$1/$2') || '';
-        const OrderTag = item['주문태그'];
+        const OrderTag = item['주문태그'] || '';
         // templateKind 디자인 = 네임스티커
         if (templateKind === '디자인') {
           // 01~09 템플릿인지 확인
@@ -245,7 +245,7 @@ const SaveBulkExcelTemplate = () => {
         const variant = '긴급';
         const template = templatePart.split(': ')[1];
         const SNumber = item['출력차수']?.replace(/.*?(\d+)차\/(\d+)번.*/, '$1/$2') || '';
-        const OrderTag = item['주문태그'];
+        const OrderTag = item['주문태그'] || '';
 
         // templateKind 디자인 = 네임스티커
         if (templateKind === '디자인') {
