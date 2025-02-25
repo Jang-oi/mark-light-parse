@@ -104,6 +104,39 @@ function getFilePath(filePath, fileName) {
   return filePath.replace(/illustrator_script\.jsx$/, fileName);
 }
 
+function createProcessParam(layer, param, xOffset, yOffset, resultLayer) {
+  return {
+    currentLayer: layer,
+    yOffset: yOffset || 0,
+    xOffset: xOffset || 0,
+    orderName: param.orderName,
+    mainName: param.mainName,
+    subName: param.subName,
+    phoneNumber: param.phoneNumber,
+    fundingNumber: param.fundingNumber,
+    SNumber: param.SNumber,
+    Tag: param.Tag,
+    resultLayer: resultLayer,
+  };
+}
+
+function processParamsByVariantType(params, variantType, variantTypeNumber, resultLayer) {
+  for (var i = 0; i < params.length; i++) {
+    var layer = findLayerByName(params[i].layerName);
+    var xOffset = 0;
+    var yOffset = i * variantTypeNumber;
+
+    // 베이직 'D' 타입의 경우 X/Y 위치 계산
+    if (variantType === 'D') {
+      xOffset = i % 2 === 1 ? 290 : 0;
+      yOffset = Math.floor(i / 2) * 210;
+    }
+
+    var processParam = createProcessParam(layer, params[i], xOffset, yOffset, resultLayer);
+    processLayer(processParam);
+  }
+}
+
 if (doc) {
   var filePath = $.fileName;
   var illustratorParamPath = getFilePath(filePath, 'illustratorParams.json');
@@ -124,59 +157,9 @@ if (doc) {
 
   var pdfName = params[0].pdfName;
   var resultLayer = findLayerByName('결과물');
-  // 각 항목 처리
-  if (variantType === 'D') {
-    for (var i = 0; i < params.length; i++) {
-      var dogXOffset = i % 2 === 1 ? 290 : 0;
-      var dogYOffset = Math.floor(i / 2) * 210;
-      var dogProcessParam = {
-        currentLayer: findLayerByName(params[i].layerName),
-        yOffset: dogYOffset,
-        xOffset: dogXOffset,
-        orderName: params[i].orderName,
-        mainName: params[i].mainName,
-        phoneNumber: params[i].phoneNumber,
-        fundingNumber: params[i].fundingNumber,
-        SNumber: params[i].SNumber,
-        Tag: params[i].Tag,
-        resultLayer: resultLayer,
-      };
 
-      processLayer(dogProcessParam);
-    }
-  } else if (variantType === 'E') {
-    for (var j = 0; j < params.length; j++) {
-      var emergencyProcessParam = {
-        currentLayer: findLayerByName(params[j].layerName),
-        yOffset: j * variantTypeNumber,
-        orderName: params[j].orderName,
-        mainName: params[j].mainName,
-        subName: params[j].subName,
-        fundingNumber: params[j].fundingNumber,
-        SNumber: params[j].SNumber,
-        Tag: params[j].Tag,
-        resultLayer: resultLayer,
-      };
-
-      processLayer(emergencyProcessParam);
-    }
-  } else {
-    for (var k = 0; k < params.length; k++) {
-      var nameProcessParam = {
-        currentLayer: findLayerByName(params[k].layerName),
-        yOffset: k * variantTypeNumber,
-        orderName: params[k].orderName,
-        mainName: params[k].mainName,
-        subName: params[k].subName,
-        fundingNumber: params[k].fundingNumber,
-        SNumber: params[k].SNumber,
-        Tag: params[k].Tag,
-        resultLayer: resultLayer,
-      };
-
-      processLayer(nameProcessParam);
-    }
-  }
+  // 파라미터에 따른 레이어 처리
+  processParamsByVariantType(params, variantType, variantTypeNumber, resultLayer);
 
   var configFile = new File(configFilePath);
 

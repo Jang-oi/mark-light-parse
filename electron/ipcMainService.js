@@ -22,19 +22,33 @@ const createResponse = (success, message = '', data = {}) => ({
   message,
   data,
 });
+
+function validatePath(filePath, description) {
+  if (!filePath || !fs.existsSync(filePath)) {
+    throw new Error(`${description} 경로가 유효하지 않습니다: ${filePath || '경로 미지정'}`);
+  }
+
+  const stat = fs.statSync(filePath);
+  if (!stat.isFile()) {
+    throw new Error(`${description} 경로가 파일이 아닙니다: ${filePath}`);
+  }
+}
+
 export function setupIpcHandlers() {
   ipcMain.handle('savePath', async (event, pathData) => {
     try {
       fs.writeFileSync(configFilePath, JSON.stringify(pathData));
       return createResponse(true, '경로 저장 완료');
     } catch (error) {
-      return createResponse(false, `경로 저장 중 오류 발생 : ${error.message}`);
+      return createResponse(false, `경로 저장 중 오류 발생: ${error.message}`);
     }
   });
 
   ipcMain.handle('savePDF', async (event, templateData, pathData) => {
     try {
       const { illustratorInstallPath } = pathData;
+      validatePath(illustratorInstallPath, 'Illustrator 실행 파일');
+
       fs.writeFileSync(illustratorParamPath, JSON.stringify(templateData));
 
       const extendScriptCommand = `"${illustratorInstallPath}" -r "${illustratorScriptPath}"`;
@@ -49,6 +63,8 @@ export function setupIpcHandlers() {
   ipcMain.handle('saveTIFF', async (event, pdfFileData, pathData) => {
     try {
       const { photoshopInstallPath } = pathData;
+      validatePath(photoshopInstallPath, 'Photoshop 실행 파일');
+
       fs.writeFileSync(photoshopParamPath, JSON.stringify(pdfFileData));
 
       const extendScriptCommand = `"${photoshopInstallPath}" -r ${photoshopScriptPath}`;
@@ -63,6 +79,9 @@ export function setupIpcHandlers() {
   ipcMain.handle('savePDFAndTIFF', async (event, templateData, pathData) => {
     try {
       const { illustratorInstallPath, photoshopInstallPath, pdfSavePath } = pathData;
+      validatePath(illustratorInstallPath, 'Illustrator 실행 파일');
+      validatePath(photoshopInstallPath, 'Photoshop 실행 파일');
+
       fs.writeFileSync(illustratorParamPath, JSON.stringify(templateData));
 
       const illustratorExtendScriptCommand = `"${illustratorInstallPath}" -r "${illustratorScriptPath}"`;
@@ -90,7 +109,6 @@ export function setupIpcHandlers() {
 
   ipcMain.handle('getConfig', async () => {
     try {
-      // 파일이 없으면 빈 파일 생성
       if (!fs.existsSync(configFilePath)) {
         const initJsonString = '{"illustratorInstallPath": "", "pdfSavePath": ""}';
         fs.writeFileSync(configFilePath, initJsonString, 'utf-8');
@@ -104,6 +122,7 @@ export function setupIpcHandlers() {
 
   ipcMain.handle('openFolder', async (event, path) => {
     try {
+      validatePath(path, '폴더 경로');
       await shell.openPath(path);
       return createResponse(true, '');
     } catch (error) {
@@ -133,6 +152,8 @@ export function setupIpcHandlers() {
   ipcMain.handle('saveLogoPDF', async (event, updatedLogoImageData, pathData) => {
     try {
       const { illustratorInstallPath } = pathData;
+      validatePath(illustratorInstallPath, 'Illustrator 실행 파일');
+
       fs.writeFileSync(logoSaveParamPath, JSON.stringify(updatedLogoImageData));
 
       const extendScriptCommand = `"${illustratorInstallPath}" -r "${logoSaveScriptPath}"`;
@@ -147,6 +168,9 @@ export function setupIpcHandlers() {
   ipcMain.handle('saveLogoPDFAndTIFF', async (event, updatedLogoImageData, pathData) => {
     try {
       const { illustratorInstallPath, photoshopInstallPath, pdfSavePath } = pathData;
+      validatePath(illustratorInstallPath, 'Illustrator 실행 파일');
+      validatePath(photoshopInstallPath, 'Photoshop 실행 파일');
+
       fs.writeFileSync(logoSaveParamPath, JSON.stringify(updatedLogoImageData));
 
       const extendScriptCommand = `"${illustratorInstallPath}" -r "${logoSaveScriptPath}"`;

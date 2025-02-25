@@ -14,7 +14,11 @@ export default function SetupPage() {
   };
 
   const handleSavePath = async () => {
-    await handleAsyncTask({ apiFunc: () => window.electron.savePath(configData) });
+    await handleAsyncTask({
+      validationFunc: () => Object.values(configData).some((value) => !value),
+      validationMessage: '모든 경로 값을 입력해야 합니다.',
+      apiFunc: async () => await window.electron.savePath(configData),
+    });
   };
 
   return (

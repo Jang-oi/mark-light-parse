@@ -13,9 +13,12 @@ import LoadingModal from '@/components/common/LoadingModal.tsx';
 import { useConfigStore } from '@/store/configStore.ts';
 import { useLoadingStore } from '@/store/loadingStore.ts';
 import SaveTiffPage from '@/pages/TIFF/SaveTiffPage.tsx';
+import MarkConfirm from '@/components/common/MarkConfirm.tsx';
+import { useConfirmStore } from '@/store/confirmStore.ts';
 
 export default function App() {
   const { setConfigData } = useConfigStore();
+  const { setConfirm } = useConfirmStore();
   const { startLoading, stopLoading } = useLoadingStore();
   const [isUpdate, setIsUpdate] = useState(false);
 
@@ -29,7 +32,14 @@ export default function App() {
 
         window.ipcRenderer.on('update-available', (_event, response) => {
           console.log(response);
-          setIsUpdate(response.isUpdate);
+          if (response.isUpdate) {
+            setConfirm({
+              title: '업데이트 하시겠습니까??',
+              handleProceed: () => {
+                setIsUpdate(response.isUpdate);
+              },
+            });
+          }
         });
         stopLoading();
       } else {
@@ -44,6 +54,7 @@ export default function App() {
       <RootLayout isUpdate={isUpdate}>
         <Toaster />
         <MarkAlert />
+        <MarkConfirm />
         <LoadingModal />
         <Routes>
           <Route path={'/'} element={<SetupPage />} />
