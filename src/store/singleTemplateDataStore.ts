@@ -15,6 +15,8 @@ const INIT_TEMPLATE_DATA = {
   layerName: '',
   _mainName: '',
   pdfName: '',
+  SNumber: '',
+  Tag: '',
 };
 
 // 상태 인터페이스 정의
@@ -31,6 +33,8 @@ interface TemplateData {
   layerName: string;
   _mainName: string;
   pdfName: string;
+  SNumber: string;
+  Tag: string;
 }
 
 interface SingleTemplateDataState {

@@ -66,7 +66,7 @@ const SaveBulkExcelTemplate = () => {
           // 1 ~ 7 템플릿은 이름에서 공백 제거 후 길이를 계산하여 2~4글자 이하인 경우만
           if (templateNumber <= 7) {
             const cleanedOption = mainName.replace(/\s+/g, '');
-            isMainName = cleanedOption.length >= 2 && cleanedOption.length <= 4;
+            isMainName = /^[가-힣]+$/.test(cleanedOption) && cleanedOption.length >= 2 && cleanedOption.length <= 4;
             mainName = cleanedOption;
           } else if (templateNumber === 8) {
             // 영어 대소문자, 공백, 쉼표, 마침표, 백틱만 허용
@@ -172,7 +172,7 @@ const SaveBulkExcelTemplate = () => {
         // 1 ~ 7 템플릿은 이름에서 공백 제거 후 길이를 계산하여 4글자 이하인 경우만
         if (templateNumber <= 7) {
           const cleanedOption = mainName.replace(/\s+/g, '');
-          isMainName = cleanedOption.length <= 4;
+          isMainName = /^[가-힣]+$/.test(cleanedOption) && cleanedOption.length <= 4;
           mainName = cleanedOption;
         } else if (templateNumber === 8) {
           // 영어 대소문자, 공백, 쉼표, 마침표, 백틱만 허용
